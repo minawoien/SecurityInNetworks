@@ -23,9 +23,9 @@ def transposition_cipher(text, key):
 
     # creates the columns of the transposition cipher matrix with five letters
     matrix = []
-    for j in range(len(key)):
+    for j in range(len(key)): # Endre?
         column = []
-        for i in range(len(rows)):
+        for i in range(len(rows)): #Endre?
             column.append(rows[i][j])
         matrix.append(column)
 
