@@ -35,7 +35,7 @@ class AutoKey:
 
 class GenerateKey:
     def __init__(self, common_words, quadgrams):
-        self.current_key = "aaa"
+        self.current_key = "aa"
         self.list = common_words
         self.saved = []
         self.count = 0
@@ -81,25 +81,32 @@ class GenerateKey:
         # self.current_key = child_key
         # return num_par_key
         
-    def calculate_freq_score(self, text):
+    def calculate_freq_score(self, text, key):
+        # if len(key) <= 3:
+        #     score = 0
+        #     for i in range(len(self.list)):
+        #         if self.list[i] in text:
+        #             score += 1
+        #     return score
         sequences = self.find_sequences(text)
         fitness = self.calculate_fitness(sequences)
         return fitness
-
-        # score = 0
-        # for i in range(len(self.list)):
-        #     if self.list[i] in text:
-        #         if len(self.list[i]) > 2:
-        #             score += 1
-        #         score += 1
-        # return score
+    
+    def calc_score(self, text):
+        score = 0
+        for i in range(len(self.list)):
+            if self.list[i] in text:
+                if len(self.list[i]) > 2:
+                    score += 1
+                score += 1
+        return score
     
     def remove_low_score(self, key_score):
         sorted_score = dict(sorted(key_score.items(), key=lambda item: item[1], reverse=True))
         best_score = {}
         count = 0
         for i in sorted_score:
-            if count == 15:
+            if count == 25:
                 break
             best_score[i] = sorted_score[i]
             count += 1
@@ -109,10 +116,11 @@ class GenerateKey:
     def best_letter(self, key_score):
         index = []
         count = 0
-        print(self.saved)
+        #print(self.saved)
         if len(self.saved) == 0:
             for j in key_score:
-                if count == self.key_length:
+                #if count == self.key_length:
+                if count == 6:
                     break
                 if j[0] not in index:
                     index.append(j[0])
@@ -120,7 +128,8 @@ class GenerateKey:
         else:
             for i in range(len(self.saved)):
                 for j in key_score:
-                    if count == self.key_length:
+                    #if count == self.key_length:
+                    if count == 6:
                         break
                     if j[i+1] not in index:
                         index.append(j[i+1])
@@ -140,7 +149,7 @@ class GenerateKey:
 
     # Extracting each quadgram
     def find_sequences(self, text):
-        sequences=[]
+        sequences = []
         length = 4
         for j in range(len(text)):
             base = text[j:j+length]
@@ -168,7 +177,7 @@ class Tester:
                 now = len(key)-4
                 generate = len(self.gen_key.saved[now])
             for j in range(generate):
-                if len(key) > 3 :
+                if len(key) > 3:
                     key[now] = self.gen_key.saved[now][j]
                 start_key = key
                 text = ""
@@ -178,7 +187,7 @@ class Tester:
                     number = self.auto_key.find_plaintext(key, cipher_numb)
                     key = number
                     text += letters(number)
-                score = self.gen_key.calculate_freq_score(text)
+                score = self.gen_key.calculate_freq_score(text, start_key)
                 self.gen_key.current_key = letters(start_key)
                 key_score[self.gen_key.current_key] = score
                 key = self.gen_key.next_key()
@@ -186,7 +195,7 @@ class Tester:
                     break
         #print(key_score)
         best_score = self.gen_key.remove_low_score(key_score)
-        print("best score: ", best_score)
+        #print("best score: ", best_score)
         self.gen_key.best_letter(best_score)
         self.gen_key.current_key = self.gen_key.current_key + "a"
         return best_score
@@ -216,19 +225,35 @@ if __name__ == "__main__":
     cipher_numb = numerically(encrypted)
 
     tester = Tester(common_words, quadgrams)
-    for i in range(4):
+    keys = []
+    for i in range(5):
         best_score = tester.test()
-    print(best_score)
-    for key in best_score:
-        key_num = numerically(key)
-        cipher_numb = numerically(encrypted)
-        text =""
-        for x in range(round(len(encrypted)/len(key_num))):
-            number = auto_key.find_plaintext(key_num, cipher_numb)
-            key_num = number
-            text += letters(number)
-        print(key)
-        print(text)
+        best_key = {}
+        for key in best_score:
+            key_num = numerically(key)
+            cipher_numb = numerically(encrypted)
+            text =""
+            for x in range(round(len(encrypted)/len(key_num))):
+                number = auto_key.find_plaintext(key_num, cipher_numb)
+                key_num = number
+                text += letters(number)
+            score = gen_key.calc_score(text)
+            best_key[key] = score
+            # print(key)
+            # print(text)
+            # print()
+        wanted_key = max(best_key, key=best_key.get)
+        print("Key length: ", len(key))
+        print("Best suited key: ", wanted_key)
+        print("Match with english text: ", best_key[wanted_key])
+        # text =""
+        # key_num = numerically(wanted_key)
+        # cipher_numb = numerically(encrypted)
+        # for x in range(round(len(encrypted)/len(key_num))):
+        #     number = auto_key.find_plaintext(key_num, cipher_numb)
+        #     key_num = number
+        #     text += letters(number)
+        # print(text)
         print()
 
 

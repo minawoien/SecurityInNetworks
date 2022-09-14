@@ -34,9 +34,9 @@ class GenerateKey:
     def __init__(self, common_words):
         self.current_key = "aaa"
         self.key_length = len(self.current_key)
-        self.low_freq = ["j", "q", "x", "z"]
+        self.low_freq = ["q", "x", "z"]
         self.list = common_words
-        self.high_freq = ["t", "e", "a", "w", "y"]
+        self.high_freq = ["t", "e", "a"]
         #self.saved = numerically(list(string.ascii_lowercase))
         self.saved = []
         self.count = 0
