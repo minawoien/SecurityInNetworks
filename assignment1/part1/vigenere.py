@@ -25,6 +25,7 @@ def find_sequences(encrypted):
                         sequences[base].append(j)
     remove_duplicates()
     remove_keys()
+    print(sequences)
 
 
 # Removes the keys where the keys are inside another key if their length of repetitions are less than 4

@@ -1,3 +1,5 @@
+import math
+
 # Letters expressed numerically
 def numerically(encrypted):
     numeric = []
@@ -32,12 +34,13 @@ class AutoKey:
 
 
 class GenerateKey:
-    def __init__(self, common_words):
+    def __init__(self, common_words, quadgrams):
         self.current_key = "aaa"
         self.list = common_words
         self.saved = []
         self.count = 0
         self.all_scores = []
+        self.quadgrams = quadgrams
 
     # Look at all lists in the self.saved list
     def next_key(self):
@@ -79,11 +82,17 @@ class GenerateKey:
         # return num_par_key
         
     def calculate_freq_score(self, text):
-        score = 0
-        for i in range(len(self.list)):
-            if self.list[i] in text:
-                score += 1
-        return score
+        sequences = self.find_sequences(text)
+        fitness = self.calculate_fitness(sequences)
+        return fitness
+
+        # score = 0
+        # for i in range(len(self.list)):
+        #     if self.list[i] in text:
+        #         if len(self.list[i]) > 2:
+        #             score += 1
+        #         score += 1
+        # return score
     
     def remove_low_score(self, key_score):
         sorted_score = dict(sorted(key_score.items(), key=lambda item: item[1], reverse=True))
@@ -119,10 +128,32 @@ class GenerateKey:
         self.saved.append(numerically(index))
         print(self.saved)
         return self.saved
+    
+    def calculate_fitness(self, sequences):
+        fitness = 0
+        for i in sequences:
+            if i in self.quadgrams.keys():
+                count = int(self.quadgrams[i])
+                prob = math.log(count/len(self.quadgrams))
+                fitness += prob
+        return fitness
+
+    # Extracting each quadgram
+    def find_sequences(self, text):
+        sequences=[]
+        length = 4
+        for j in range(len(text)):
+            base = text[j:j+length]
+            if len(base) < length:
+                break
+            if base not in sequences:
+                sequences.append(base)
+        return sequences
+
 
 class Tester:
-    def __init__(self, common_words):
-        self.gen_key = GenerateKey(common_words)
+    def __init__(self, common_words, quadgrams):
+        self.gen_key = GenerateKey(common_words, quadgrams)
         self.auto_key = AutoKey()
     
     def test(self):
@@ -136,13 +167,9 @@ class Tester:
             if (len(key) > 3):
                 now = len(key)-4
                 generate = len(self.gen_key.saved[now])
-                print(generate, "generate")
             for j in range(generate):
                 if len(key) > 3 :
-                    print("Lengde:" ,len(key))
-                    print(now)
                     key[now] = self.gen_key.saved[now][j]
-                    print(key[0], "key[0]")
                 start_key = key
                 text = ""
                 # cipher text til tall
@@ -153,38 +180,42 @@ class Tester:
                     text += letters(number)
                 score = self.gen_key.calculate_freq_score(text)
                 self.gen_key.current_key = letters(start_key)
-                if score > 0:
-                    key_score[self.gen_key.current_key] = score
+                key_score[self.gen_key.current_key] = score
                 key = self.gen_key.next_key()
                 if key is None:
                     break
         #print(key_score)
         best_score = self.gen_key.remove_low_score(key_score)
         print("best score: ", best_score)
-        saved = self.gen_key.best_letter(best_score)
-        print(text)
-        print(self.gen_key.current_key)
+        self.gen_key.best_letter(best_score)
         self.gen_key.current_key = self.gen_key.current_key + "a"
         return best_score
+
 
 if __name__ == "__main__":
     common_words = []
     with open("words.txt", "r") as file:
         for i in file.readlines():
             common_words.append(i.strip())
+    
+    quadgrams = {}
+    with open("english_quadgrams.txt") as file:
+        for line in file.readlines():
+            line = line.strip().split(" ")
+            quadgrams[line[0].lower()] = line[1]
 
-    #encrypted = 'FRRPU TIIYE AMIRN QLQVR BOKGK NSNQQ IUTTY IIYEA WIJTG LVILA ZWZKT ZCJQH IFNYI WQZXH RWZQW OHUTI KWNNQ YDLKA EOTUV XELMT SOSIX JSKPR BUXTI TBUXV BLNSX FJKNC HBLUK PDGUI IYEAM OJCXW FMJVM MAXYT XFLOL RRLAA JZAXT YYWFY NBIVH VYQIO SLPXH ZGYLH WGFSX LPSND UKVTR XPKSS VKOWM QKVCR TUUPR WQMWY XTYLQ XYYTR TJJGO OLMXV CPPSL KBSEI PMEGC RWZRI YDBGE BTMFP ZXVMF MGPVO OKZXX IGGFE SIBRX SEWTY OOOKS PKYFC ZIEYF DAXKG ARBIW KFWUA SLGLF NMIVH VVPTY IJNSX FJKNC HBLUK PDGUI IYEAM HVFDY CULJS EHHMX LRXBN OLVMR'
+    encrypted = 'FRRPU TIIYE AMIRN QLQVR BOKGK NSNQQ IUTTY IIYEA WIJTG LVILA ZWZKT ZCJQH IFNYI WQZXH RWZQW OHUTI KWNNQ YDLKA EOTUV XELMT SOSIX JSKPR BUXTI TBUXV BLNSX FJKNC HBLUK PDGUI IYEAM OJCXW FMJVM MAXYT XFLOL RRLAA JZAXT YYWFY NBIVH VYQIO SLPXH ZGYLH WGFSX LPSND UKVTR XPKSS VKOWM QKVCR TUUPR WQMWY XTYLQ XYYTR TJJGO OLMXV CPPSL KBSEI PMEGC RWZRI YDBGE BTMFP ZXVMF MGPVO OKZXX IGGFE SIBRX SEWTY OOOKS PKYFC ZIEYF DAXKG ARBIW KFWUA SLGLF NMIVH VVPTY IJNSX FJKNC HBLUK PDGUI IYEAM HVFDY CULJS EHHMX LRXBN OLVMR'
     #encrypted = "ZICVTWQNGKZEIIGAS XSTSLVVWLA "
-    encrypted = "TIFGNSTMUQZIZEIFPQNMTJHVTKRAEELMJHICAYPVETUWMFCIZPAXOIAJACBCQEKGFJXRGFERCXRTWCBXUGYNBOLVMVBTSWKBTTOSYXRVNQNEMEOHLNOLFVISHYXYVJSPXHIWMFEVVBCZTNXJLLXVFYDTWWQPPEYKIVDRJZXMSIHZRLAAJZAXTYHIPUYRDOQYUCMDPCTCMDKJDGFBBNJDIEBSAIHKFKBGUBLDMHYMPSFSPXSTXTMWHFTIFXTJAMJFEPSOMXZYEOSPCZRMVHQWQXPXKGJSQGOLUPMFUFSMSFUZMRVGYOMLVKWULJOJWBNRMWFBNNHIVMZDZELEAQI"
+    #encrypted = "TIFGNSTMUQZIZEIFPQNMTJHVTKRAEELMJHICAYPVETUWMFCIZPAXOIAJACBCQEKGFJXRGFERCXRTWCBXUGYNBOLVMVBTSWKBTTOSYXRVNQNEMEOHLNOLFVISHYXYVJSPXHIWMFEVVBCZTNXJLLXVFYDTWWQPPEYKIVDRJZXMSIHZRLAAJZAXTYHIPUYRDOQYUCMDPCTCMDKJDGFBBNJDIEBSAIHKFKBGUBLDMHYMPSFSPXSTXTMWHFTIFXTJAMJFEPSOMXZYEOSPCZRMVHQWQXPXKGJSQGOLUPMFUFSMSFUZMRVGYOMLVKWULJOJWBNRMWFBNNHIVMZDZELEAQI"
 
     encrypted = encrypted.replace(" ", "").lower()
 
-    gen_key = GenerateKey(common_words)
+    gen_key = GenerateKey(common_words, quadgrams)
 
     auto_key = AutoKey()
     cipher_numb = numerically(encrypted)
 
-    tester = Tester(common_words)
+    tester = Tester(common_words, quadgrams)
     for i in range(4):
         best_score = tester.test()
     print(best_score)
@@ -199,4 +230,6 @@ if __name__ == "__main__":
         print(key)
         print(text)
         print()
+
+
     
