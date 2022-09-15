@@ -19,15 +19,17 @@ class AutoKey:
 
     # Find plaintext numerically with the use of the key
     # Returns plaintext in numbers for det first len(key) letters
-    def find_plaintext(self, key, encrypted):
+    # The first letter in cipher_text will be removed from the list of encrypted letters because the function
+    # always decipher the first letter in the cipher_text
+    def find_plaintext(self, key, cipher_text):
         numbers = []
         for i in range(len(key)):
-            if len(encrypted) > 0:
-                plain_number = encrypted[0]-key[i]
+            if len(cipher_text) > 0:
+                plain_number = cipher_text[0]-key[i]
                 if plain_number < 0:
                     plain_number = 26 + plain_number
                 numbers.append(plain_number)
-                encrypted.pop(0)
+                cipher_text.pop(0)
         return numbers
 
 
