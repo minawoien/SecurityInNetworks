@@ -1,4 +1,5 @@
 import math
+import time
 
 # Letters expressed numerically
 def numerically(encrypted):
@@ -33,16 +34,16 @@ class AutoKey:
 
 
 # Class used to generate the most correct key
-# The class takes in a list of common English words used to generate the best keys
+# The class takes in a list of common English words and a list of quadgrams, used to generate the best keys
 # It saves a current_key variable which starts as "aa"
 # It also saves a list where the letters I want to save and further use to generate keys, gets saved
 # count?
 class GenerateKey:
-    def __init__(self, common_words):
+    def __init__(self, common_words, quadgrams):
         self.current_key = "aa"
         self.list = common_words
+        self.quadgrams = quadgrams
         self.saved = []
-        self.count = 0
 
     # Finds the next current key
     # Express the current key numerically, and return None to indicate that a letter can be added to the key,
@@ -57,17 +58,11 @@ class GenerateKey:
             return None
         
         # Finds the current index to change letter of
-        now = len(num_par_key)-3
-            
-            # for j in range(len(self.saved[now])):
-            #     print(j, "j hver gang")
-            #     print(now, "now")
-            #     num_par_key[0] = self.saved[now][j]
-
         # Loop through the length of the numerically key and starts on the current index
         # If the letter numerically is higher than 25, which is higher than the English alphabet it becomes an
         # a and the loop stops for each changed letter
         # The key gets expressed in letters and set as current key, and returned numerically
+        now = len(num_par_key)-3
         for i in range(now, len(num_par_key)):
             num_par_key[i] += 1
             if num_par_key[i] > 25:
@@ -77,29 +72,18 @@ class GenerateKey:
         child_key = letters(num_par_key)
         self.current_key = child_key
         return num_par_key
-        # else:
-        #     res = all(ele == 25 for ele in num_par_key)
-        #     if res is True:
-        #         return None  
-        #     for i in range(len(num_par_key)):
-        #         num_par_key[i] += 1
-        #         if num_par_key[i] > 25:
-        #             num_par_key[i] = 0
-        #         else:
-        #             break
-        # child_key = letters(num_par_key)
-        # print(child_key)
-        # self.current_key = child_key
-        # return num_par_key
-
+        
+    # Calculates the fitness score by finding the sequences, and calculate a fitness for all sequences
+    def calculate_fitness_score(self, text):
+        sequences = self.find_sequences(text)
+        fitness = self.calculate_fitness(sequences)
+        return fitness
     
     # Calculates a score based on who many common English words are in the current deciphered text
     def calc_score(self, text):
         score = 0
         for i in range(len(self.list)):
             if self.list[i] in text:
-                # if len(self.list[i]) > 2:
-                #     score += 1
                 score += 1
         return score
     
@@ -116,6 +100,7 @@ class GenerateKey:
             count += 1
         return best_score
 
+ 
     # Function to find which letter to save
     def best_letter(self, key_score):
         index = []
@@ -170,8 +155,8 @@ class GenerateKey:
 
 # Test class that takes in the GenerateKey and AutoKey class
 class Tester:
-    def __init__(self, common_words):
-        self.gen_key = GenerateKey(common_words)
+    def __init__(self, common_words, quadgrams):
+        self.gen_key = GenerateKey(common_words, quadgrams)
         self.auto_key = AutoKey()
     
     def test(self):
@@ -209,17 +194,15 @@ class Tester:
                     text += letters(number)
                 # The fitness score is calculated and saved with the key expressed in letters before the next
                 # key is find
-                score = self.gen_key.calc_score(text)
+                score = self.gen_key.calculate_fitness_score(text)
                 self.gen_key.current_key = letters(start_key)
                 key_score[self.gen_key.current_key] = score
                 key = self.gen_key.next_key()
                 if key is None:
                     break
-        #print(key_score)
         # The keys with the best fitness is find and and used to find which letters to save and use for the
         # next key length before the best score dictionary are returned
         best_score = self.gen_key.remove_low_score(key_score)
-        #print("best score: ", best_score)
         self.gen_key.best_letter(best_score)
         self.gen_key.current_key = self.gen_key.current_key + "a"
         return best_score
@@ -231,37 +214,47 @@ if __name__ == "__main__":
     with open("words.txt", "r") as file:
         for i in file.readlines():
             common_words.append(i.strip())
+    
+    # Quadgrams are imported and put into a dictionary containing the quadgrams as key and the count of their
+    # apperance as value 
+    quadgrams = {}
+    with open("english_quadgrams.txt") as file:
+        for line in file.readlines():
+            line = line.strip().split(" ")
+            quadgrams[line[0].lower()] = line[1]
 
     # The cipher_text gets expressed in low letters and spaces are removed before it gets expressed numerically
     encrypted = 'FRRPU TIIYE AMIRN QLQVR BOKGK NSNQQ IUTTY IIYEA WIJTG LVILA ZWZKT ZCJQH IFNYI WQZXH RWZQW OHUTI KWNNQ YDLKA EOTUV XELMT SOSIX JSKPR BUXTI TBUXV BLNSX FJKNC HBLUK PDGUI IYEAM OJCXW FMJVM MAXYT XFLOL RRLAA JZAXT YYWFY NBIVH VYQIO SLPXH ZGYLH WGFSX LPSND UKVTR XPKSS VKOWM QKVCR TUUPR WQMWY XTYLQ XYYTR TJJGO OLMXV CPPSL KBSEI PMEGC RWZRI YDBGE BTMFP ZXVMF MGPVO OKZXX IGGFE SIBRX SEWTY OOOKS PKYFC ZIEYF DAXKG ARBIW KFWUA SLGLF NMIVH VVPTY IJNSX FJKNC HBLUK PDGUI IYEAM HVFDY CULJS EHHMX LRXBN OLVMR'
     encrypted = encrypted.replace(" ", "").lower()
     cipher_numb = numerically(encrypted)
 
-    gen_key = GenerateKey(common_words)
+    gen_key = GenerateKey(common_words, quadgrams)
     auto_key = AutoKey()
-    tester = Tester(common_words)
+    tester = Tester(common_words, quadgrams)
 
     # Loops through the length of the maximum key length I want to find the best score of
     for i in range(9):
+        start_time = time.time()
         best_score = tester.test()
         best_key = {}
         # Loops through the best score and decipher the cipher text again with the best keys
         # Then a score is calculated based on how many common English words there are in the deciphered text
-        key = max(best_score, key=best_score.get)
-        key_num = numerically(key)
-        cipher_numb = numerically(encrypted)
-        text =""
-        for x in range(round(len(encrypted)/len(key_num))):
-            number = auto_key.find_plaintext(key_num, cipher_numb)
-            key_num = number
-            text += letters(number)
+        for key in best_score:
+            key_num = numerically(key)
+            cipher_numb = numerically(encrypted)
+            text =""
+            for x in range(round(len(encrypted)/len(key_num))):
+                number = auto_key.find_plaintext(key_num, cipher_numb)
+                key_num = number
+                text += letters(number)
+            score = gen_key.calc_score(text)
+            best_key[key] = score
         # The key with the highest score gets saved for each key length, and then the key with the highest
         # score are the best key the algorithm finds
-        #wanted_key = max(best_key, key=best_key.get)
+        wanted_key = max(best_key, key=best_key.get)
         print("Key length: ", len(key))
-        print("Best suited key: ", key)
-        print(text)
+        print("Best suited key: ", wanted_key)
+        print("Match with english text: ", best_key[wanted_key])
+        end_time = time.time()
+        print("Speed: ", end_time-start_time)
         print()
-
-
-    
