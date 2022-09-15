@@ -1,5 +1,4 @@
 import math
-import time
 
 # Letters expressed numerically
 def numerically(encrypted):
@@ -234,7 +233,6 @@ if __name__ == "__main__":
 
     # Loops through the length of the maximum key length I want to find the best score of
     for i in range(9):
-        start_time = time.time()
         best_score = tester.test()
         best_key = {}
         # Loops through the best score and decipher the cipher text again with the best keys
@@ -255,6 +253,4 @@ if __name__ == "__main__":
         print("Key length: ", len(key))
         print("Best suited key: ", wanted_key)
         print("Match with english text: ", best_key[wanted_key])
-        end_time = time.time()
-        print("Speed: ", end_time-start_time)
         print()

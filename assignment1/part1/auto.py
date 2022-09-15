@@ -58,11 +58,6 @@ class GenerateKey:
         
         # Finds the current index to change letter of
         now = len(num_par_key)-3
-            
-            # for j in range(len(self.saved[now])):
-            #     print(j, "j hver gang")
-            #     print(now, "now")
-            #     num_par_key[0] = self.saved[now][j]
 
         # Loop through the length of the numerically key and starts on the current index
         # If the letter numerically is higher than 25, which is higher than the English alphabet it becomes an
@@ -77,21 +72,6 @@ class GenerateKey:
         child_key = letters(num_par_key)
         self.current_key = child_key
         return num_par_key
-        # else:
-        #     res = all(ele == 25 for ele in num_par_key)
-        #     if res is True:
-        #         return None  
-        #     for i in range(len(num_par_key)):
-        #         num_par_key[i] += 1
-        #         if num_par_key[i] > 25:
-        #             num_par_key[i] = 0
-        #         else:
-        #             break
-        # child_key = letters(num_par_key)
-        # print(child_key)
-        # self.current_key = child_key
-        # return num_par_key
-
     
     # Calculates a score based on who many common English words are in the current deciphered text
     def calc_score(self, text):
@@ -215,11 +195,9 @@ class Tester:
                 key = self.gen_key.next_key()
                 if key is None:
                     break
-        #print(key_score)
         # The keys with the best fitness is find and and used to find which letters to save and use for the
         # next key length before the best score dictionary are returned
         best_score = self.gen_key.remove_low_score(key_score)
-        #print("best score: ", best_score)
         self.gen_key.best_letter(best_score)
         self.gen_key.current_key = self.gen_key.current_key + "a"
         return best_score

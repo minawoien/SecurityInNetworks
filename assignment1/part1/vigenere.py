@@ -47,11 +47,10 @@ def remove_keys():
 def find_length():
     for i in sequences:
         sequences[i].sort()
-        # Blir dette riktig?
         length = sequences[i][1]-sequences[i][0]
         find_factors(length)
 
-
+# Find the factors of the lengths
 def find_factors(length):
     for i in range(1, length + 1):
        if length % i == 0:
