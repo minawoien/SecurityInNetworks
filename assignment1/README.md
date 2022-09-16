@@ -14,8 +14,8 @@ Part 2
     - To install pip: python install pip
     - To install flask: pip install flask
   - Example file to test in the browser:
-    - http://127.0.0.1:5000/?cipher=HSQQDXHDRPYFKWVHNHDLOULLQDDWVWBDWWARJULS
+    - http://127.0.0.1:5000/?cipher=sphdwdhldsqflwrdkovjhrnqwqyddaxwuwuhvlbl
 
 To run each file:
-python "filename"
+python "filename".py
 
