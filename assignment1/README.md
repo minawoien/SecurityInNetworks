@@ -15,10 +15,10 @@ This file contains the algorithm used to find the correct key to decipher the ci
   
 ## Part 2
 ### task2.py 
-This file solves task 2. It decipher the cipher text with an Caesar-cipher algorithm to decrypt the cipher text and an column-transposition-cipher algorithm to decrypt the result of the Caesar-cipher. This file can be run from the directory part2, by runing `python task2.py` in the terminal.
+This file solves task 2. It decipher the cipher text with a Caesar-cipher algorithm to decrypt the cipher text and a column-transposition-cipher algorithm to decrypt the result of the Caesar-cipher. This file can be run from the directory part2, by runing `python task2.py` in the terminal.
 
 ### task4.py 
-This file solves task 4. It encrypts the plain text message from task 2 with an an column-transposition-cipher algorithm to encrypt the plain text message, and than the result from that encryption with the same algorithm, before that result gets encrypted with the Caesar-cipher algorithm. This file can be run from the directory part2, by runing `python task4.py` in the terminal.
+This file solves task 4. It encrypts the plain text message from task 2 with a column-transposition-cipher algorithm to encrypt the plain text message, and than the result from that encryption with the same algorithm, before that result gets encrypted with the Caesar-cipher algorithm. This file can be run from the directory part2, by runing `python task4.py` in the terminal.
 
 ### app.py
 This file solves task 5. It takes in an argument in the url, and decipher it with the Caesar-cipher algorithm from task 2 first, and then uses the column-transposition-cipher algorithm from task 2 twice.
