@@ -25,7 +25,9 @@ This file solves task 5. It takes in an argument in the url, and decipher it wit
 This files require pip and flask installed.
 - To install pip: `python install pip`
 - To install flask: `pip install flask`
+
 This file can be run from the directory part2, by runing `python app.py` in the terminal.
+
 Example file to test in the browser: http://127.0.0.1:5000/?cipher=HSQQDXHDRPYFKWVHNHDLOULLQDDWVWBDWWARJULS
 
 
