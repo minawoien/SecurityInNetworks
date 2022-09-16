@@ -14,10 +14,10 @@ This file contains the algorithm that checks how many English common words each 
 This file contains the algorithm used to find the correct key to decipher the cipher text. It uses both the file english_quadgrams.txt and the file words.txt. This file can be run from the directory part1, by runing `python autokey_quad.py` in the terminal.
 
 ### english_quadgrams.txt
-This file is downloaded from James Lyons, "Quadgram Statistics as a Fitness Measure", http://practicalcryptography.com/cryptanalysis/text-characterisation/quadgrams/
+This file contains English quadgrams downloaded from James Lyons, "Quadgram Statistics as a Fitness Measure", http://practicalcryptography.com/cryptanalysis/text-characterisation/quadgrams/
 
 ### words.txt
-This file is contains the 1000 most common words in English from "1000 most common words in English", https://www.ef.com/wwen/english-resources/english-vocabulary/top-1000-words/
+This file contains the 1000 most common words in English from "1000 most common words in English", https://www.ef.com/wwen/english-resources/english-vocabulary/top-1000-words/
   
 ## Part 2
 ### task2.py 
