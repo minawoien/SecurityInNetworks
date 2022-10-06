@@ -1,5 +1,4 @@
 import random
-import BigNumber
 
 class Convert:
     def __init__(self):
@@ -17,14 +16,26 @@ class Convert:
         return decimal
 
 class BobServer:
-    def __init__(self):
-        self.PU_a = -1
-        self.PU_b = -1
+    PU_a = -1
+    
+    def __init__(self, private, public):
+        self.PU_b = private
+        self.PR_b = public
+    
+    def get_public_key(self):
+        return self.PU_b
+
 
 class AliceServer:
-    def __init__(self):
-        self.PU_a = -1
-        self.PU_b = -1
+    PU_b = -1
+
+    def __init__(self, private, public):
+        self.PU_a = private
+        self.PR_a = public
+
+    def get_public_key(self):
+        return self.PU_a
+        
 
 class DiffieHellman:
     def __init__(self):
@@ -37,8 +48,6 @@ class DiffieHellman:
             9ED52907 7096966D 670C354E 4ABC9804 F1746C08 CA237327 FFFFFFFF FFFFFFFF"""
         self.safe_prime = 0
         self.generator = 2
-        self.PU_a = -1
-        self.PU_b = -1
         self.convert_prime()
     
     def convert_prime(self):
@@ -53,35 +62,15 @@ class DiffieHellman:
 
     # Generate public keys for Alice and Bob. Check their name to check if it is Alice or Bob's public key
     # that are going to be stored public 
-    def generate_public_key(self, private_key, name):
-        public_key = (self.generator ** private_key)% self.safe_prime
-        if name == "a":
-            self.PU_a = public_key
-        else:
-            self.PU_b = public_key
+    def generate_public_key(self, private_key):
+        return (self.generator ** private_key)% self.safe_prime
     
     # Generate a shared key, check their names to find which public key to use
     # (Eventually the public key could be returned and use the key that are different, what is better?)
-    def generate_shared_key(self, private_key, name):
-        
-            if name == "a":
-                return (self.PU_b**private_key) % self.safe_prime
-            else:
-                return (self.PU_a**private_key) % self.safe_prime
-
+    def generate_shared_key(self, private_key, public_key):
+        return (public_key**private_key) % self.safe_prime
 
 if __name__ == "__main__":
-    # Sophie germian prime
-    # prime = """FFFFFFFF FFFFFFFF C90FDAA2 2168C234 C4C6628B 80DC1CD1 29024E08 8A67CC74 020BBEA6 3B139B22 
-    #         514A0879 8E3404DD EF9519B3 CD3A431B 302B0A6D F25F1437 4FE1356D 6D51C245 E485B576 625E7EC6 
-    #         F44C42E9 A637ED6B 0BFF5CB6 F406B7ED EE386BFB 5A899FA5 AE9F2411 7C4B1FE6 49286651 ECE45B3D 
-    #         C2007CB8 A163BF05 98DA4836 1C55D39A 69163FA8 FD24CF5F 83655D23 DCA3AD96 1C62F356 208552BB 
-    #         9ED52907 7096966D 670C354E 4ABC9804 F1746C08 CA237327 FFFFFFFF FFFFFFFF"""
-    # prime = prime.replace(" ", "").replace("\n", "")
-  
-    # # Convert the germian prime to decimal
-    # converter = Convert()
-    # prime_decimal = converter.hexa_to_decimal(prime)
     dh = DiffieHellman()
     priv = dh.generate_private_key()
     dh.generate_public_key(priv, "a")
