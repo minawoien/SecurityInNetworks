@@ -1,5 +1,5 @@
-from distutils.command.upload import upload
 import random
+from Cryptodome.Cipher import AES
 
 
 class Convert:
@@ -117,6 +117,14 @@ class CSPRNG:
         return S
 
 
+class SymmetricCipher:
+    def __init__(self):
+        pass
+
+    def encrypt(self, file, key):
+        cipher = AES.new(key, AES.MODE_CBC)
+
+
 if __name__ == "__main__":
     dh = DiffieHellman()
     # Display the cyclic group and public parameters
@@ -146,7 +154,7 @@ if __name__ == "__main__":
 
     # Take input from Alice for encryption
     file = "text.txt"
-    
+
 
 
     print("\ndone")
