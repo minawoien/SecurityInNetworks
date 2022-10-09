@@ -76,8 +76,6 @@ class DiffieHellman:
 # Takes the shared key as an incoming seed
 class BBS:
     def __init__(self, seed):
-        self.p = 0
-        self.q = 0
         self.n = 0
         self.seed = seed
         self.generate_primes()
@@ -87,9 +85,9 @@ class BBS:
     # The function runs until these requirements are fulfilled
     def generate_primes(self):
         while math.gcd(self.seed, self.n) != 1:
-            self.q = 4 * random.randint(0,100) + 3
-            self.p = 4 * random.randint(0,100) + 3
-            self.n = self.p * self.q
+            q = 4 * random.randint(0,100) + 3
+            p = 4 * random.randint(0,100) + 3
+            self.n = p * q
 
     # Generate the secret key with an incoming set length
     # Produces a sequence of bits with type string and convert the string to bytes
