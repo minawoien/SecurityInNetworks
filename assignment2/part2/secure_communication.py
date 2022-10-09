@@ -1,12 +1,15 @@
 import random
+from Cryptodome.Cipher import AES
+import math
 
+# Class to convert Hexadecimal to decimal
 class Convert:
     def __init__(self):
         self.values =  {'0': 0, '1': 1, '2': 2, '3': 3,
                         '4': 4, '5': 5, '6': 6, '7': 7,
                         '8': 8, '9': 9, 'A': 10, 'B': 11,
                         'C': 12, 'D': 13, 'E': 14, 'F': 15}
-        
+    
     def hexa_to_decimal(self, hexadecimal):
         decimal = 0
         size = len(hexadecimal) - 1
@@ -15,27 +18,6 @@ class Convert:
             size = size - 1
         return decimal
 
-class BobServer:
-    PU_a = -1
-    
-    def __init__(self, private, public):
-        self.PU_b = private
-        self.PR_b = public
-    
-    def get_public_key(self):
-        return self.PU_b
-
-
-class AliceServer:
-    PU_b = -1
-
-    def __init__(self, private, public):
-        self.PU_a = private
-        self.PR_a = public
-
-    def get_public_key(self):
-        return self.PU_a
-        
 
 class DiffieHellman:
     def __init__(self):
@@ -48,30 +30,84 @@ class DiffieHellman:
             9ED52907 7096966D 670C354E 4ABC9804 F1746C08 CA237327 FFFFFFFF FFFFFFFF"""
         self.safe_prime = 0
         self.generator = 2
+        self.PU_a = -1
+        self.PU_b = -1
         self.convert_prime()
     
+    # Convert the Sophie Germain prime from hexadecimal to decimal and uses it to calculate the safe prime
+    # Get called at the beginning
     def convert_prime(self):
         self.prime = self.prime.replace(" ", "").replace("\n", "")
         self.prime = self.converter.hexa_to_decimal(self.prime)
         self.safe_prime = 2*self.prime + 1
+    
+    # Returns the shared parameters including the Sophie Germain prime
+    def get_parameters(self):
+        return {"Safe prime:": self.safe_prime, "Prime: ": self.prime, "Generator: ": self.generator}
 
     # Generate a random private key that is less than the safe prime
     def generate_private_key(self):
         #return random.randint(0, self.safe_prime-1)
         return random.randint(0, 100)
 
-    # Generate public keys for Alice and Bob. Check their name to check if it is Alice or Bob's public key
-    # that are going to be stored public 
+    # Generate public keys for Alice and Bob.
     def generate_public_key(self, private_key):
         return (self.generator ** private_key)% self.safe_prime
     
-    # Generate a shared key, check their names to find which public key to use
-    # (Eventually the public key could be returned and use the key that are different, what is better?)
+    # Generate a shared key
     def generate_shared_key(self, private_key, public_key):
         return (public_key**private_key) % self.safe_prime
 
-if __name__ == "__main__":
-    dh = DiffieHellman()
-    priv = dh.generate_private_key()
-    dh.generate_public_key(priv, "a")
-    print("done")
+
+# Class for cryptographically strong pseudo-random number generator (CSPRNG)
+# Using the Blum Blum Shub generator to generate a random secret key
+# Takes the shared key as an incoming seed
+class BBS:
+    def __init__(self, seed):
+        self.n = 0
+        self.seed = seed
+        self.generate_primes()
+
+    # Generate two large primes, q and p, with random, that both have a remainder 3 when divided by 4
+    # Generate n which is relative prime to the seed and is the product of p and q
+    # The function runs until these requirements are fulfilled
+    def generate_primes(self):
+        while math.gcd(self.seed, self.n) != 1:
+            q = 4 * random.randint(0,100) + 3
+            p = 4 * random.randint(0,100) + 3
+            self.n = p * q
+
+    # Generate the secret key with an incoming set length
+    # Produces a sequence of bits with type string and convert the string to bytes
+    def generate_key(self, length):
+        B = ""
+        x = [self.seed**2 % self.n]
+        for i in range(1, length+1):
+            x.append(x[i-1]**2 % self.n)
+            B += str(x[i] % 2)
+        return bytes(int(B[i : i + 8], 2) for i in range(0, len(B), 8))
+
+
+# Class for symmetric cipher, the AES
+# Create stored values for tag and nonce
+class SymmetricCipher:
+    def __init__(self):
+        self.tag = b""
+        self.nonce = b""
+
+    # Encrypt the incoming message with the incoming secret key
+    # Uses the builtin function AES with EAX mode
+    # Store the tag and nonce and return the encrypted message
+    def encrypt(self, message, key):
+        cipher = AES.new(key, AES.MODE_EAX)
+        ciphertext, self.tag = cipher.encrypt_and_digest(message)
+        self.nonce = cipher.nonce
+        return ciphertext
+
+    # Decrypt the incoming ciphertext with the incoming secret key
+    # Uses the builtin function AES with EAX mode
+    # Uses the stored tag and nonce, and return the plaintext
+    def decrypt(self, ciphertext, key):
+        cipher = AES.new(key, AES.MODE_EAX, self.nonce)
+        plaintext = cipher.decrypt_and_verify(ciphertext, self.tag)
+        return plaintext
