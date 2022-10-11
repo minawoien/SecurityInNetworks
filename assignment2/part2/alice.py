@@ -27,6 +27,14 @@ def send_message():
     requests.post("http://localhost:5000/getmsg", json={"msg": str(encrypted_msg)})
     return render_template('indexA.html', title="Message sent", establish=None, msg=None)
 
+@app.route("/getmsga", methods=["POST"])
+def get_msg():
+    data = request.get_json()
+    # Covert back to bytes
+    data = eval(data["msg"])
+    AliceServer.message = sym_ciph.decrypt(data, AliceServer.secret_key)
+    return redirect(url_for("index"))
+
 @app.route("/getpub", methods=["POST"])
 def get_communication():
     data = requests.get("http://localhost:5000/sendpua").content
@@ -40,7 +48,9 @@ def send_communication():
 
 @app.route("/", methods=["GET"])
 def index():
-    if AliceServer.PU_b != -1:
+    if AliceServer.message != "":
+        return render_template("indexA.html", title="Connection established", establish="True", msg=AliceServer.message,)
+    elif AliceServer.PU_b != -1:
         generate_secret()
         return render_template('indexA.html', title="Connection established", establish="True", msg=None)
     return render_template('indexA.html', title="Welcome", establish=None, msg=None)

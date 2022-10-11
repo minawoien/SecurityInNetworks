@@ -26,6 +26,13 @@ def get_msg():
     BobServer.message = sym_ciph.decrypt(data, BobServer.secret_key)
     return redirect(url_for("index"))
 
+@app.route("/sendmsga", methods=["POST", "GET"])
+def send_message():
+    message = (request.form.get("message"))
+    encrypted_msg = sym_ciph.encrypt(bytes(message, "UTF-8"), BobServer.secret_key)
+    requests.post("http://localhost:8080/getmsga", json={"msg": str(encrypted_msg)})
+    return render_template('indexB.html', msg=None, established="True")
+
 @app.route("/sendpua", methods=["GET"])
 def send_communication():
     return {"Public_key": bob.get_public_key()}
@@ -40,11 +47,11 @@ def get_communication():
 @app.route("/")
 def index():
     if BobServer.message != "":
-        return render_template("indexB.html", msg=BobServer.message)
+        return render_template("indexB.html", msg=BobServer.message, established="True")
     elif BobServer.PU_a != -1:
         generate_secret()
-        return render_template("indexB.html", msg=None)
-    return render_template("indexB.html", msg=None)
+        return render_template("indexB.html", msg=None, established="True")
+    return render_template("indexB.html", msg=None, established=None)
 
 if __name__ == "__main__":
     app.run(debug=True, host='127.0.0.1')

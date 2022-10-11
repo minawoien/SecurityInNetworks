@@ -14,6 +14,7 @@ class BobServer:
 class AliceServer:
     PU_b = -1
     secret_key = b""
+    message = ""
 
     def __init__(self, private, public):
         self.PU_a = public

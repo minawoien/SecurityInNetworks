@@ -4,12 +4,20 @@
 </head>
 <body>
     <H1>Hei</H1>
-    {% if msg %}
-        <h3>Message from Alice</h3>
-        <p>{{msg}}</p>
+    {% if established %}
+        <h3>Send Message to Alice</h3>
+        <form method="post" action="/sendmsga">
+            <input type="text" name="message">
+            <input type="submit" name="send" value="Send">
+        </form>
+        {% if msg %}
+            <h3>Message from Alice</h3>
+            <p>{{msg}}</p>
+        {% endif %}
     {% else %}
+        <h3>Establish connection to Alice</h3>
         <form method="post" action="/getpua">
-            <input type="submit" value="Establish connection">
+            <input type="submit" value="Establish">
         </form>
     {% endif %}
 </body>
