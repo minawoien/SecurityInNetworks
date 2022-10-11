@@ -14,10 +14,12 @@ To run the code make sure to be in the part 1 folder and run: `python secure_com
 Open a terminal for Alice and one for Bob
 
 `export FLASK_APP=alice.py`
+`flask run --host 0.0.0.0 --port 8080`
 
-`flask run --host 0.0.0.0 --port 5000`
+\`flask run --host 0.0.0.0 --port 5000`
 
 
 `export FLASK_APP=bob.py`
+`flask run --host 0.0.0.0 --port 5000`
 
-`flask run --host 0.0.0.0 --port 5001`
+\`flask run --host 0.0.0.0 --port 5001`

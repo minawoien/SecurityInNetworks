@@ -1,8 +1,5 @@
-import imp
-from this import s
-from flask import Flask, redirect, url_for
-import requests
-import json
+from flask import Flask, render_template
+import requests, json
 
 from servers import BobServer
 from secure_communication import *
@@ -20,18 +17,23 @@ def checkConnection():
         bbs = BBS(shared_key)
         secret_key = bbs.generate_key(16*8)
         print(secret_key)
+        
 
 app = Flask(__name__)
 
+@app.route("/send", methods=["GET"])
+def send():
+    print("heieheiei")
+    return "Bob's Send page"
 
-@app.route("/", methods=["GET"])
+
+@app.route("/sendpua", methods=["GET"])
 def send_communication():
-    requests.post("http://192.168.10.102:5000/")
     return {"Public_key": bob.get_public_key()}
 
-@app.route("/", methods=["POST"])
+@app.route("/getpua", methods=["POST"])
 def get_communication():
-    data = requests.get("http://192.168.10.102:5000/").content
+    data = requests.get("http://localhost:8080/sendpub").content
     data = json.loads(data)["Public_key"]
     BobServer.PU_a = data
     checkConnection()
@@ -39,7 +41,7 @@ def get_communication():
 
 @app.route("/")
 def index():
-    return "Helloeffv"
+    return render_template("base_bob.html")
 
 if __name__ == "__main__":
-    app.run(debug=True, host='0.0.0.0')
+    app.run(debug=True, host='127.0.0.1')
