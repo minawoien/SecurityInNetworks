@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<head>
+    <title>Flask</title>
+</head>
+<body>
+    <H1>{{title}}</H1>
+    {% if establish %}
+        {% if msg %}
+            <h3>Received message from bob</h3>
+            <p>{{ msg }}</p>
+        {% else %}
+            <h3>Send Message to Bob</h3>
+            <form method="post" action="/sendmsg">
+                <input type="text" name="message">
+                <input type="submit" name="establish">
+            </form>
+        {% endif %}
+    {% else %}
+        <form method="post" action="/getpub">
+            <h3>Establish connection to Bob</h3>
+            <input type="submit" name="establish" value="Establish">
+        </form> 
+    {% endif %}
+</body>
+

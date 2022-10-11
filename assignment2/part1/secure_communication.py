@@ -112,7 +112,7 @@ class SymmetricCipher:
     # Store the tag and nonce and return the encrypted message
     def encrypt(self, message, key):
         cipher = AES.new(key, AES.MODE_EAX)
-        ciphertext, self.tag = cipher.encrypt_and_digest(message)
+        ciphertext = cipher.encrypt(message)
         self.nonce = cipher.nonce
         return ciphertext
 
@@ -121,7 +121,7 @@ class SymmetricCipher:
     # Uses the stored tag and nonce, and return the plaintext
     def decrypt(self, ciphertext, key):
         cipher = AES.new(key, AES.MODE_EAX, self.nonce)
-        plaintext = cipher.decrypt_and_verify(ciphertext, self.tag)
+        plaintext = cipher.decrypt(ciphertext)
         return plaintext
 
 

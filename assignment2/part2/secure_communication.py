@@ -1,3 +1,4 @@
+from pydoc import plainpager
 import random
 from Cryptodome.Cipher import AES
 import math
@@ -91,23 +92,24 @@ class BBS:
 # Class for symmetric cipher, the AES
 # Create stored values for tag and nonce
 class SymmetricCipher:
-    def __init__(self):
-        self.tag = b""
-        self.nonce = b""
-
     # Encrypt the incoming message with the incoming secret key
     # Uses the builtin function AES with EAX mode
     # Store the tag and nonce and return the encrypted message
     def encrypt(self, message, key):
+        print(key)
         cipher = AES.new(key, AES.MODE_EAX)
-        ciphertext, self.tag = cipher.encrypt_and_digest(message)
-        self.nonce = cipher.nonce
-        return ciphertext
+        ciphertext = cipher.encrypt(message)
+        result = cipher.nonce + ciphertext
+        return result
 
     # Decrypt the incoming ciphertext with the incoming secret key
     # Uses the builtin function AES with EAX mode
     # Uses the stored tag and nonce, and return the plaintext
     def decrypt(self, ciphertext, key):
-        cipher = AES.new(key, AES.MODE_EAX, self.nonce)
-        plaintext = cipher.decrypt_and_verify(ciphertext, self.tag)
+        print(key)
+        nonce = ciphertext[:16]
+        ciphertext = ciphertext[16:]
+        cipher = AES.new(key, AES.MODE_EAX, nonce)
+        plaintext = cipher.decrypt(ciphertext)
+        print(plaintext)
         return plaintext
