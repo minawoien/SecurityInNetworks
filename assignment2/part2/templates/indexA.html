@@ -5,15 +5,14 @@
 <body>
     <H1>{{title}}</H1>
     {% if establish %}
+        <h3>Send Message to Bob</h3>
+        <form method="post" action="/sendmsg">
+            <input type="text" name="message">
+            <input type="submit" name="establish">
+        </form>
         {% if msg %}
             <h3>Received message from bob</h3>
             <p>{{ msg }}</p>
-        {% else %}
-            <h3>Send Message to Bob</h3>
-            <form method="post" action="/sendmsg">
-                <input type="text" name="message">
-                <input type="submit" name="establish">
-            </form>
         {% endif %}
     {% else %}
         <form method="post" action="/getpub">

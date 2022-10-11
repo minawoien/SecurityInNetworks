@@ -12,10 +12,8 @@ sym_ciph = SymmetricCipher()
 
 def generate_secret():
     shared_key = dh.generate_shared_key(private_key, BobServer.PU_a)
-    print("Shared", shared_key)
     bbs = BBS(shared_key)
     BobServer.secret_key = bbs.generate_key(16*8)
-    print(BobServer.secret_key)
     
 message = ""
 app = Flask(__name__)
@@ -30,7 +28,6 @@ def get_msg():
 
 @app.route("/sendpua", methods=["GET"])
 def send_communication():
-    print("Bob", bob.get_public_key())
     return {"Public_key": bob.get_public_key()}
 
 @app.route("/getpua", methods=["POST"])
@@ -38,7 +35,6 @@ def get_communication():
     data = requests.get("http://localhost:8080/sendpub").content
     data = json.loads(data)["Public_key"]
     BobServer.PU_a = data
-    print("Alice", BobServer.PU_a)
     return redirect(url_for("index"))
 
 @app.route("/")
@@ -47,7 +43,7 @@ def index():
         return render_template("indexB.html", msg=BobServer.message)
     elif BobServer.PU_a != -1:
         generate_secret()
-        return render_template("indexB.html", msg="established")
+        return render_template("indexB.html", msg=None)
     return render_template("indexB.html", msg=None)
 
 if __name__ == "__main__":

@@ -1,7 +1,5 @@
-from pydoc import plainpager
 import random
 from Cryptodome.Cipher import AES
-import math
 
 # Class to convert Hexadecimal to decimal
 class Convert:
@@ -69,18 +67,18 @@ class BBS:
         self.seed = seed
         self.generate_primes()
 
-    # Generate two large primes, q and p, with random, that both have a remainder 3 when divided by 4
+    # Generate two large primes, q and p, that both have a remainder 3 when divided by 4
     # Generate n which is relative prime to the seed and is the product of p and q
     # The function runs until these requirements are fulfilled
     def generate_primes(self):
-        while math.gcd(self.seed, self.n) != 1:
-            q = 4 * random.randint(0,100) + 3
-            p = 4 * random.randint(0,100) + 3
-            self.n = p * q
+        p = 71
+        q = 139
+        self.n = p * q 
 
     # Generate the secret key with an incoming set length
     # Produces a sequence of bits with type string and convert the string to bytes
     def generate_key(self, length):
+        print(self.n)
         B = ""
         x = [self.seed**2 % self.n]
         for i in range(1, length+1):
@@ -96,7 +94,6 @@ class SymmetricCipher:
     # Uses the builtin function AES with EAX mode
     # Store the tag and nonce and return the encrypted message
     def encrypt(self, message, key):
-        print(key)
         cipher = AES.new(key, AES.MODE_EAX)
         ciphertext = cipher.encrypt(message)
         result = cipher.nonce + ciphertext
@@ -106,10 +103,8 @@ class SymmetricCipher:
     # Uses the builtin function AES with EAX mode
     # Uses the stored tag and nonce, and return the plaintext
     def decrypt(self, ciphertext, key):
-        print(key)
         nonce = ciphertext[:16]
         ciphertext = ciphertext[16:]
         cipher = AES.new(key, AES.MODE_EAX, nonce)
         plaintext = cipher.decrypt(ciphertext)
-        print(plaintext)
-        return plaintext
+        return plaintext.decode("UTF-8")
