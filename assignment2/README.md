@@ -8,7 +8,8 @@ Install the required package to run the code:
 ## Part 1
 This task includes the folder "part1" which contains the file "secure_communication.py" and "RC4.py". The "secure_communication.py" file is the answer to this task and includes step 1-8. The "RC4.py" file is a class for an attempted solution on the CSPRNG with the use of RC4, but is not used in the final solution of the task.
 
-To run the code make sure to be in the part 1 folder and run: `python secure_communication.py`
+### To run the program
+To run the code make sure to be in the "part1" folder and run: `python secure_communication.py`
 
 
 ## Part 2
@@ -23,7 +24,7 @@ The file "secure_communications.py" is almost equal to the one i the folder "par
 The folder "templates" contains two html-files for view the data in the web-browser.
 
 ### To run the program
-Open one terminal for Alice and one for Bob
+Make sure to be in the "part2" folder and open one terminal for Alice and one for Bob
 
 In one terminal:
 
