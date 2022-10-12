@@ -1,4 +1,3 @@
-from crypt import methods
 from flask import Flask, redirect, url_for, render_template, request
 import requests, json
 
@@ -32,9 +31,12 @@ app = Flask(__name__)
 @app.route("/sendmsg", methods=["POST", "GET"])
 def send_message():
     message = (request.form.get("message"))
+    if message == "":
+        err = "Message can not be empty."
+        return render_template('indexA.html', title="Message failed", establish="True", msg=None, error=err)
     encrypted_msg = sym_ciph.encrypt(bytes(message, "UTF-8"), AliceServer.secret_key)
     requests.post("http://localhost:5000/getmsg", json={"msg": str(encrypted_msg)})
-    return render_template('indexA.html', title="Message sent", establish=None, msg=None)
+    return render_template('indexA.html', title="Message sent", establish="True", msg=None, error=None)
 
 # Get called when Alice receives a post request from Bob
 # Get the encrypted message from json and convert it back to bytes
@@ -70,11 +72,11 @@ def send_communication():
 @app.route("/", methods=["GET"])
 def index():
     if AliceServer.message != "":
-        return render_template("indexA.html", title="Connection established", establish="True", msg=AliceServer.message,)
+        return render_template("indexA.html", title="Connection established", establish="True", msg=AliceServer.message, error=None)
     elif AliceServer.PU_b != -1:
         generate_secret()
-        return render_template('indexA.html', title="Connection established", establish="True", msg=None)
-    return render_template('indexA.html', title="Welcome Alice", establish=None, msg=None)
+        return render_template('indexA.html', title="Connection established", establish="True", msg=None, error=None)
+    return render_template('indexA.html', title="Welcome Alice", establish=None, msg=None, error=None)
 
 if __name__ == "__main__":
     app.run(debug=True, host='127.0.0.1')

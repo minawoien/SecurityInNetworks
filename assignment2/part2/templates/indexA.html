@@ -4,6 +4,9 @@
 </head>
 <body>
     <H1>{{title}}</H1>
+    {% if error %}
+    <p style="color:red">{{error}}</p>
+    {% endif %}
     {% if establish %}
         <h3>Send Message to Bob</h3>
         <form method="post" action="/sendmsg">

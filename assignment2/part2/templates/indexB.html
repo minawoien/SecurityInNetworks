@@ -3,6 +3,10 @@
     <title>Flask</title>
 </head>
 <body>
+    {% if error %}
+        <h1>Message Failed</h1>
+        <p style="color:red">{{error}}</p>
+    {% endif %}
     {% if established %}
         <h1>Connection established</h1>
         <h3>Send Message to Alice</h3>
