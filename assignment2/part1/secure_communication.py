@@ -43,7 +43,7 @@ class DiffieHellman:
     
     # Returns the shared parameters including the Sophie Germain prime
     def get_parameters(self):
-        return {"Safe prime:": self.safe_prime, "Prime: ": self.prime, "Generator: ": self.generator}
+        return {"Safe prime: ": self.safe_prime, "Prime: ": self.prime, "Generator: ": self.generator}
 
     # Generate a random private key that is less than the safe prime
     def generate_private_key(self):
@@ -104,12 +104,11 @@ class BBS:
 # Create stored values for tag and nonce
 class SymmetricCipher:
     def __init__(self):
-        self.tag = b""
         self.nonce = b""
 
     # Encrypt the incoming message with the incoming secret key
     # Uses the builtin function AES with EAX mode
-    # Store the tag and nonce and return the encrypted message
+    # Store the nonce and return the encrypted message
     def encrypt(self, message, key):
         cipher = AES.new(key, AES.MODE_EAX)
         ciphertext = cipher.encrypt(message)
@@ -118,7 +117,7 @@ class SymmetricCipher:
 
     # Decrypt the incoming ciphertext with the incoming secret key
     # Uses the builtin function AES with EAX mode
-    # Uses the stored tag and nonce, and return the plaintext
+    # Uses the stored nonce, and return the plaintext
     def decrypt(self, ciphertext, key):
         cipher = AES.new(key, AES.MODE_EAX, self.nonce)
         plaintext = cipher.decrypt(ciphertext)
@@ -130,7 +129,8 @@ if __name__ == "__main__":
     # Display the cyclic group and public parameters
     parameters = dh.get_parameters()
     for i in parameters:
-        print(f"{i}\n{parameters[i]}")
+        print(f"{i}{parameters[i]}")
+
     
     # Display public key for Alice and Bob
     # Generate private keys for Alice and Bob which they will use to generate public keys
@@ -144,7 +144,7 @@ if __name__ == "__main__":
     # Display the shared key
     shared_key = dh.generate_shared_key(pr_a)
     if shared_key == dh.generate_shared_key(pr_b):
-        print("Shared key: \n", shared_key)
+        print("Shared key: ", shared_key)
     else:
         print("Something went wrong")
 
@@ -152,21 +152,22 @@ if __name__ == "__main__":
     # The secret key has en given length of 16 bytes, as the AES with EAX mode require a length of 16 bytes
     bbs = BBS(shared_key)
     secret_key = bbs.generate_key(16*8)
-    print("Secret key: \n", secret_key)
+    print("Secret key: ", secret_key)
 
     # Take input from Alice for encryption and convert it to bytes
-    message = "Hello, this is a secret text"
-    #message = input("Write your message to Bob: ")
-    print("Alice's message: \n", message)
+    #message = "Hello, this is a secret text"
+    message = input("Write your message to Bob: ")
+    print("Alice's message: ", message)
+
     message = bytes(message, "UTF-8")
 
     # Uses the symmetric cipher to encrypt the message
     sym_ciph = SymmetricCipher()
     ciphertext = sym_ciph.encrypt(message, secret_key)
-    print("Encrypted message: \n", ciphertext)
+    print("Encrypted message: ", ciphertext)
 
     # Uses the symmetric cipher to decrypt the message and convert it to string
     plaintext = sym_ciph.decrypt(ciphertext, secret_key)
     plaintext = str(plaintext, "UTF-8")
-    print("Decrypted message: \n", plaintext)
+    print("Decrypted message: ", plaintext)
 

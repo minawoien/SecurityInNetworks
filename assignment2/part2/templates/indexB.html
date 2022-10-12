@@ -3,8 +3,8 @@
     <title>Flask</title>
 </head>
 <body>
-    <H1>Hei</H1>
     {% if established %}
+        <h1>Connection established</h1>
         <h3>Send Message to Alice</h3>
         <form method="post" action="/sendmsga">
             <input type="text" name="message">
@@ -15,6 +15,7 @@
             <p>{{msg}}</p>
         {% endif %}
     {% else %}
+        <H1>Welcome Bob</H1>
         <h3>Establish connection to Alice</h3>
         <form method="post" action="/getpua">
             <input type="submit" value="Establish">

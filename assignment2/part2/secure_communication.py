@@ -46,7 +46,6 @@ class DiffieHellman:
 
     # Generate a random private key that is less than the safe prime
     def generate_private_key(self):
-        #return random.randint(0, self.safe_prime-1)
         return random.randint(0, 100)
 
     # Generate public keys for Alice and Bob.
@@ -69,7 +68,6 @@ class BBS:
 
     # Generate two large primes, q and p, that both have a remainder 3 when divided by 4
     # Generate n which is relative prime to the seed and is the product of p and q
-    # The function runs until these requirements are fulfilled
     def generate_primes(self):
         p = 71
         q = 139
@@ -88,20 +86,21 @@ class BBS:
 
 
 # Class for symmetric cipher, the AES
-# Create stored values for tag and nonce
 class SymmetricCipher:
     # Encrypt the incoming message with the incoming secret key
     # Uses the builtin function AES with EAX mode
-    # Store the tag and nonce and return the encrypted message
+    # Adds the nonce to the beginning of the ciphertext
+    # Returns the nonce and ciphertext together
     def encrypt(self, message, key):
         cipher = AES.new(key, AES.MODE_EAX)
         ciphertext = cipher.encrypt(message)
         result = cipher.nonce + ciphertext
         return result
 
+    # Set the nonce as the 16 first bytes of the ciphertext and the remaining as the ciphertext
     # Decrypt the incoming ciphertext with the incoming secret key
     # Uses the builtin function AES with EAX mode
-    # Uses the stored tag and nonce, and return the plaintext
+    # Return the plaintext
     def decrypt(self, ciphertext, key):
         nonce = ciphertext[:16]
         ciphertext = ciphertext[16:]
