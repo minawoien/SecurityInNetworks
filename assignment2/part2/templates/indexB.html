@@ -3,12 +3,11 @@
     <title>Flask</title>
 </head>
 <body>
+    <h1>{{title}}</h1>
     {% if error %}
-        <h1>Message Failed</h1>
         <p style="color:red">{{error}}</p>
     {% endif %}
     {% if established %}
-        <h1>Connection established</h1>
         <h3>Send Message to Alice</h3>
         <form method="post" action="/sendmsga">
             <input type="hidden" value="This is a secret text" name="message">
@@ -23,7 +22,6 @@
             <p>{{msg}}</p>
         {% endif %}
     {% else %}
-        <H1>Welcome Bob</H1>
         <h3>Establish connection to Alice</h3>
         <form method="post" action="/getpua">
             <input type="submit" value="Establish">

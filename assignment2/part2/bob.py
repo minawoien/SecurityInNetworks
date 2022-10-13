@@ -44,10 +44,10 @@ def send_message():
     message = (request.form.get("message"))
     if message == "":
         err = "Message can not be empty."
-        return render_template('indexB.html', msg=None, establish="True", error=err)
+        return render_template('indexB.html', title="Message failed", msg=None, established="True", error=err)
     encrypted_msg = sym_ciph.encrypt(bytes(message, "UTF-8"), BobServer.secret_key)
     requests.post("http://localhost:8080/getmsga", json={"msg": str(encrypted_msg)})
-    return render_template('indexB.html', msg=None, established="True", error=None)
+    return render_template('indexB.html', title="Message sent", msg=None, established="True", error=None)
 
 # Get called when Alice request Bob's public key
 # Returns Bob's public key
@@ -71,11 +71,11 @@ def get_communication():
 @app.route("/")
 def index():
     if BobServer.message != "":
-        return render_template("indexB.html", msg=BobServer.message, established="True", error=None)
+        return render_template("indexB.html", title="Connection established", msg=BobServer.message, established="True", error=None)
     elif BobServer.PU_a != -1:
         generate_secret()
-        return render_template("indexB.html", msg=None, established="True", error=None)
-    return render_template("indexB.html", msg=None, established=None, error=None)
+        return render_template("indexB.html", title="Connection established", msg=None, established="True", error=None)
+    return render_template("indexB.html", title="Welcome Bob", msg=None, established=None, error=None)
 
 if __name__ == "__main__":
     app.run(debug=True, host='127.0.0.1')
