@@ -11,6 +11,10 @@
         <h1>Connection established</h1>
         <h3>Send Message to Alice</h3>
         <form method="post" action="/sendmsga">
+            <input type="hidden" value="This is a secret text" name="message">
+            <input type="submit" name="sendpre" value="Send predefined message"/>
+        </form>
+        <form method="post" action="/sendmsga">
             <input type="text" name="message">
             <input type="submit" name="send" value="Send">
         </form>

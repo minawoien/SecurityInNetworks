@@ -46,15 +46,15 @@ class DiffieHellman:
 
     # Generate a random private key that is less than the safe prime
     def generate_private_key(self):
-        return random.randint(0, 100)
+        return random.randint(0, self.safe_prime-1)
 
     # Generate public keys for Alice and Bob.
     def generate_public_key(self, private_key):
-        return (self.generator ** private_key)% self.safe_prime
+        return pow(self.generator, private_key, self.safe_prime)
     
     # Generate a shared key
     def generate_shared_key(self, private_key, public_key):
-        return (public_key**private_key) % self.safe_prime
+        return pow(public_key, private_key, self.safe_prime)
 
 
 # Class for cryptographically strong pseudo-random number generator (CSPRNG)

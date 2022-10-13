@@ -47,13 +47,13 @@ class DiffieHellman:
 
     # Generate a random private key that is less than the safe prime
     def generate_private_key(self):
-        #return random.randint(0, self.safe_prime-1)
-        return random.randint(0, 100)
+        return random.randint(0, self.safe_prime-1)
 
     # Generate public keys for Alice and Bob. If Alice's key is not set, we set it, otherwise Bob's private
     # key is set.
     def generate_public_key(self, private_key):
-        pu = (self.generator ** private_key)% self.safe_prime
+        pu = pow(self.generator, private_key, self.safe_prime)
+        #pu = (self.generator ** private_key)% self.safe_prime
         if self.PU_a == -1:
             self.PU_a = pu
         else:
@@ -65,10 +65,9 @@ class DiffieHellman:
     # to check if it is equal to Alice's public key, and if it is we use Bob's public key to generate the
     # shared key, otherwise Alice's public key
     def generate_shared_key(self, private_key):
-        if self.PU_a == (self.generator ** private_key)% self.safe_prime:
-            return (self.PU_b**private_key) % self.safe_prime
-        else:
-            return (self.PU_a**private_key) % self.safe_prime
+        if self.PU_a == pow(self.generator, private_key, self.safe_prime):
+            return pow(self.PU_b, private_key, self.safe_prime)
+        return pow(self.PU_a, private_key, self.safe_prime)
 
 
 # Class for cryptographically strong pseudo-random number generator (CSPRNG)

@@ -10,8 +10,12 @@
     {% if establish %}
         <h3>Send Message to Bob</h3>
         <form method="post" action="/sendmsg">
+            <input type="hidden" value="This is a secret text" name="message">
+            <input type="submit" name="sendpre" value="Send predefined message"/>
+        </form>
+        <form method="post" action="/sendmsg">
             <input type="text" name="message">
-            <input type="submit" name="establish" value="Send">
+            <input type="submit" name="send" value="Send">
         </form>
         {% if msg %}
             <h3>Received message from bob</h3>
