@@ -1,3 +1,5 @@
+from secure_communication import DiffieHellman, Convert
+
 class CSPRNG:
     def __init__(self, shared_key):
         self.seed = shared_key
@@ -39,10 +41,10 @@ class CSPRNG:
             S[j] = save
         return S
     
-    def generate_key(self, S):
+    def generate_key(self, S, length):
         i = 0
         j = 0
-        while True:
+        for i in range(length):
             i = (i + 1) % 256
             j = (j + S[i]) % 256
             save = S[i]
@@ -50,13 +52,32 @@ class CSPRNG:
             S[j] = save
             t = (S[i] + S[j]) % 256
             k = S[t]
-            print(k)
+        print(k)
 
 
 if __name__ == "__main__":
+    dh = DiffieHellman()
+    # Display the cyclic group and public parameters
+    parameters = dh.get_parameters()
+    for i in parameters:
+        print(f"{i}{parameters[i]}")
+
+    # Display public key for Alice and Bob
+    # Generate private keys for Alice and Bob which they will use to generate public keys
+    pr_a = dh.generate_private_key()
+    pr_b = dh.generate_private_key()
+
+    # Use their private key to generate public keys
+    print("Alice public key: ", dh.generate_public_key(pr_a))
+    print("Bob public key: ", dh.generate_public_key(pr_b))
+
+    # Display the shared key
+    shared_key = dh.generate_shared_key(pr_a)
+
     # Generate the secret key with the use of RC4
     csprng = CSPRNG(dh.generate_shared_key(pr_a))
     csprng.convert_to_bytes()
     S = csprng.generate_state_vector()
-    secret_key = csprng.convert_to_int(S)
-    print("Secret key: \n", secret_key)
+    state_vector = csprng.convert_to_int(S)
+    print("State vector: ", state_vector)
+    print("Secret key: ", csprng.generate_key(state_vector, 10))
