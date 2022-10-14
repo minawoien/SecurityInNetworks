@@ -1,4 +1,5 @@
 import random
+from unittest import result
 from Cryptodome.Cipher import AES
 
 # Class to convert Hexadecimal to decimal
@@ -76,13 +77,15 @@ class BBS:
     # Generate the secret key with an incoming set length
     # Produces a sequence of bits with type string and convert the string to bytes
     def generate_key(self, length):
-        print(self.n)
         B = ""
         x = [self.seed**2 % self.n]
         for i in range(1, length+1):
             x.append(x[i-1]**2 % self.n)
             B += str(x[i] % 2)
-        return bytes(int(B[i : i + 8], 2) for i in range(0, len(B), 8))
+        b = []
+        for i in range(0, len(B), 8):
+            b.append(int(B[i:i+8], 2))
+        return bytes(b)
 
 
 # Class for symmetric cipher, the AES

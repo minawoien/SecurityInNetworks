@@ -96,7 +96,10 @@ class BBS:
         for i in range(1, length+1):
             x.append(x[i-1]**2 % self.n)
             B += str(x[i] % 2)
-        return bytes(int(B[i : i + 8], 2) for i in range(0, len(B), 8))
+        b = []
+        for i in range(0, len(B), 8):
+            b.append(int(B[i:i+8], 2))
+        return bytes(b)
 
 
 # Class for symmetric cipher, the AES
