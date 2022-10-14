@@ -109,7 +109,7 @@ class SymmetricCipher:
     # Uses the builtin function AES with EAX mode
     # Store the nonce and return the encrypted message
     def encrypt(self, message, key):
-        cipher = AES.new(key, AES.MODE_EAX)
+        cipher = AES.new(key, AES.MODE_CTR)
         ciphertext = cipher.encrypt(message)
         self.nonce = cipher.nonce
         return ciphertext
@@ -118,7 +118,7 @@ class SymmetricCipher:
     # Uses the builtin function AES with EAX mode
     # Uses the stored nonce, and return the plaintext
     def decrypt(self, ciphertext, key):
-        cipher = AES.new(key, AES.MODE_EAX, self.nonce)
+        cipher = AES.new(key, AES.MODE_CTR, nonce=self.nonce)
         plaintext = cipher.decrypt(ciphertext)
         return plaintext
 

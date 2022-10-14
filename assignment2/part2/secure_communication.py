@@ -92,18 +92,18 @@ class SymmetricCipher:
     # Adds the nonce to the beginning of the ciphertext
     # Returns the nonce and ciphertext together
     def encrypt(self, message, key):
-        cipher = AES.new(key, AES.MODE_EAX)
+        cipher = AES.new(key, AES.MODE_CTR)
         ciphertext = cipher.encrypt(message)
         result = cipher.nonce + ciphertext
         return result
 
-    # Set the nonce as the 16 first bytes of the ciphertext and the remaining as the ciphertext
+    # Set the nonce as the 8 first bytes of the ciphertext and the remaining as the ciphertext
     # Decrypt the incoming ciphertext with the incoming secret key
     # Uses the builtin function AES with EAX mode
     # Return the plaintext
     def decrypt(self, ciphertext, key):
-        nonce = ciphertext[:16]
-        ciphertext = ciphertext[16:]
-        cipher = AES.new(key, AES.MODE_EAX, nonce)
+        cipher_nonce = ciphertext[:8]
+        ciphertext = ciphertext[8:]
+        cipher = AES.new(key, AES.MODE_CTR, nonce=cipher_nonce)
         plaintext = cipher.decrypt(ciphertext)
         return plaintext.decode("UTF-8")
