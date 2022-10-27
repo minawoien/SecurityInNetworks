@@ -1,52 +1,38 @@
-from crypt import methods
-from flask import Flask, request
+from time import sleep
+from flask import Flask, request, redirect, url_for
 from argparse import ArgumentParser
-import requests, json
+from hashtable import HashTable
+import requests
 
 app = Flask(__name__)
 
-class HashTable:
-    def __init__(self):
-        self.host = None
-        self.hashTable = {}
-    
-    def set_address(self, socket, port):
-        self.hashTable[socket] = port
-    
-    def check_address(self, address):
-        if address not in self.hashTable:
-            address_info = address.split(":")
-            self.set_address(address, address_info[1])
-            return True
-        return False
-    
-
 hash = HashTable()
-# hashTable = {}
-
-# def set_addresses(socket, port):
-#     hashTable[socket] = port
 
 @app.route("/")
 def index():
     return "Hello world"
 
 # Receive the address of a node on the network, check if it is in its own hash table and adds it
-@app.route("/", methods=["POST", "GET"])
+@app.route("/est", methods=["POST"])
 def establish_con():
     data = request.get_json()
-    address = data['msg']
-    if not hash.check_address(address):
-        address_info = address.split(":")
-        print(address_info[1])
-        connect(address_info[1])
     print(data)
-    return "Hi"
+    address = data['msg']
+    print(hash.hashTable)
+    hash.check_address(address)
+    return str(len(hash.hashTable))
 
 # Connect with the remote host and sends its own address
 def connect(port):
-    requests.post("http://localhost:"+port, json={"msg": hash.host})
-    print("done")
+    response = requests.post(f"http://127.0.0.1:{port}/est", json={"msg": hash.host, "count":len(hash.hashTable)})
+    url = response.url
+    first = url.find("/") + 2
+    end = first + url[first:].find("/")
+    hash.check_address(url[first:end])
+    print(hash.hashTable)
+    print("Response sin count i hash tabellen:", int(response.text))
+    print("Min hash tabell:", len(hash.hashTable))
+    # Videre: hvis ulikt tall, må få bedt om den siste
 
 if __name__ == "__main__":
     # Insert the sockets
@@ -66,5 +52,8 @@ if __name__ == "__main__":
         remote = args.r.split(":")
         hash.set_address(args.r, remote[1])
         connect(remote[1])
-
     app.run(debug=True, host=host[0], port=host[1])
+
+
+
+
