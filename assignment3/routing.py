@@ -1,18 +1,22 @@
 class RoutingTable:
     def __init__(self):
         self.host = None
+        self.guid = None
         self.routing_to_address = {}
         self.routing_to_ID = {}
     
     # Set the address to the routing table
-    def set_address(self, socket, port):
-        self.routing_to_address[socket] = port
+    def set_address(self, guid, address):
+        self.routing_to_address[guid] = address
     
+    def set_guid(self, address, guid):
+        self.routing_to_ID[address] = guid
+
     # Check if the given address is in the routing table
-    def check_address(self, address):
+    def check_address(self, guid, address):
         if address not in self.routing_to_address:
-            address_info = address.split(":")
-            self.set_address(address, address_info[1])
+            self.set_address(guid, address)
+            self.set_guid(address, guid)
 
     # Send a heartbeat at a set time interval
     def send_heartbeat(self):

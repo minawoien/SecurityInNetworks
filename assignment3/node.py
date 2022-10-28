@@ -1,9 +1,8 @@
-from time import sleep
-from urllib import response
-from flask import Flask, request, redirect, url_for
+from flask import Flask, request
 from argparse import ArgumentParser
 from routing import RoutingTable
 import requests
+import uuid
 
 app = Flask(__name__)
 
@@ -17,24 +16,21 @@ def index():
 @app.route("/est", methods=["POST"])
 def establish_con():
     data = request.get_json()
-    address = data['msg']
-    print(routing.routing_to_address)
-    routing.check_address(address)
-    return str(len(routing.routing_to_address))
+    routing.check_address(data["guid"], data["address"])
+    print("table", routing.routing_to_address)
+    print("other", routing.routing_to_ID)
+    return routing.guid
 
 # Connect with the remote host and sends its own address
-def connect(port):
-    response = requests.post(f"http://127.0.0.1:{port}/est", json={"msg": routing.host, "count":len(routing.routing_to_address)})
+def connect(address, guid):
+    response = requests.post(f"http://{address}/est", json={"address": routing.host, "guid": guid})
     url = response.url
     first = url.find("/") + 2
     end = first + url[first:].find("/")
-    routing.check_address(url[first:end])
-    print(routing.routing_to_address)
-    print("Response sin count i routing tabellen:", int(response.text))
-    print("Min routing tabell:", len(routing.routing_to_address))
-    # Videre: hvis ulikt tall, må få bedt om den siste
-
-
+    routing.check_address(response.text, url[first:end])
+    print("table", routing.routing_to_address)
+    print("other", routing.routing_to_ID)
+   
 if __name__ == "__main__":
     # Insert the sockets
     parser = ArgumentParser()
@@ -42,18 +38,17 @@ if __name__ == "__main__":
     parser.add_argument('-r')
     args = parser.parse_args()
 
-    # Split the socket into host and port, and add it to the routing table
-    host = args.host.split(":")
+    # Create a random UUID and add it with the address to the routing table
+    guid = str(uuid.uuid4())
+    routing.guid = guid
     routing.host = args.host
-    routing.set_address(args.host, host[1])
+    routing.set_address(guid, args.host)
+    routing.set_guid(args.host, guid)
 
-    # If an remote socket is added as parameter, the socket is splitted into socket and port and added to the routing table
-    # Then the host will connect with the remote host
+    # If a remote host is added as parameter, the host will try to connect with the remote host
     if args.r is not None:
-        remote = args.r.split(":")
-        routing.set_address(args.r, remote[1])
-        connect(remote[1])
-
-    app.run(debug=True, host=host[0], port=host[1])
+        connect(args.r, guid)
+    host = args.host.split(":")
+    app.run(host=host[0], port=host[1])
 
 
