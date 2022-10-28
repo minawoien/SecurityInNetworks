@@ -22,11 +22,6 @@ def establish_con():
     routing.check_address(address)
     return str(len(routing.routing_to_address))
 
-@app.route("/getAll", methods=["GET"])
-def sync():
-    print("inni sync")
-    return "HALLO"
-
 # Connect with the remote host and sends its own address
 def connect(port):
     response = requests.post(f"http://127.0.0.1:{port}/est", json={"msg": routing.host, "count":len(routing.routing_to_address)})
@@ -37,23 +32,7 @@ def connect(port):
     print(routing.routing_to_address)
     print("Response sin count i routing tabellen:", int(response.text))
     print("Min routing tabell:", len(routing.routing_to_address))
-
-
     # Videre: hvis ulikt tall, må få bedt om den siste
-
-# Function for sending files to all the nodes in the network
-def broadcast():
-    for address in routing.routing_to_address:
-        if routing.host != routing.routing_to_address[address]:
-            response = request.post(f"http://127.0.0.1:{routing.routing_to_address[address]}/getfile")
-            print(response.text)
-
-def update_all(address):
-    port = address.split(":")
-    print(port[1])
-    sleep(9)
-    response = request.get(f"http://127.0.0.1:{port[1]}/getAll")
-    print(response.text)
 
 
 if __name__ == "__main__":
