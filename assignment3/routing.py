@@ -14,9 +14,11 @@ class RoutingTable:
 
     # Check if the given address is in the routing table
     def check_address(self, guid, address):
-        if address not in self.routing_to_address:
+        if guid not in self.routing_to_address:
             self.set_address(guid, address)
             self.set_guid(address, guid)
+            return address
+        return False
 
     # Send a heartbeat at a set time interval
     def send_heartbeat(self):

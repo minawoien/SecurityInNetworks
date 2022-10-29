@@ -1,8 +1,10 @@
+import imp
 from flask import Flask, request
 from argparse import ArgumentParser
 from routing import RoutingTable
 import requests
 import uuid
+import json
 
 app = Flask(__name__)
 
@@ -17,19 +19,29 @@ def index():
 def establish_con():
     data = request.get_json()
     routing.check_address(data["guid"], data["address"])
-    print("table", routing.routing_to_address)
-    print("other", routing.routing_to_ID)
+    for i in routing.routing_to_ID:
+        print(i)
     return routing.guid
 
+@app.route("/routingTable", methods=["GET"])
+def get_routingTable():
+    return routing.routing_to_address
+
 # Connect with the remote host and sends its own address
-def connect(address, guid):
-    response = requests.post(f"http://{address}/est", json={"address": routing.host, "guid": guid})
+def connect(address):
+    response = requests.post(f"http://{address}/est", json={"address": routing.host, "guid": routing.guid})
     url = response.url
     first = url.find("/") + 2
     end = first + url[first:].find("/")
     routing.check_address(response.text, url[first:end])
-    print("table", routing.routing_to_address)
-    print("other", routing.routing_to_ID)
+    routing_table = requests.get(f"http://{address}/routingTable").content
+    routing_table = json.loads(routing_table)
+    for guid in routing_table:
+        new_address = routing.check_address(guid, routing_table[guid])
+        if new_address:
+            requests.post(f"http://{new_address}/est", json={"address": routing.host, "guid": routing.guid})
+    for i in routing.routing_to_ID:
+        print(i)
    
 if __name__ == "__main__":
     # Insert the sockets
@@ -47,7 +59,7 @@ if __name__ == "__main__":
 
     # If a remote host is added as parameter, the host will try to connect with the remote host
     if args.r is not None:
-        connect(args.r, guid)
+        connect(args.r)
     host = args.host.split(":")
     app.run(host=host[0], port=host[1])
 
