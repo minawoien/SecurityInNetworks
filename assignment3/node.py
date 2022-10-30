@@ -1,4 +1,3 @@
-import imp
 from flask import Flask, request
 from argparse import ArgumentParser
 from routing import RoutingTable
@@ -12,7 +11,17 @@ routing = RoutingTable()
 
 @app.route("/")
 def index():
-    return "Hello world"
+    return app.send_static_file("index.html")
+
+@app.route("/uploadFile")
+def upload():
+    print("Hello")
+    return app.send_static_file("index.html")
+
+@app.route("/getNodes", methods=["GET"])
+def getNodes():
+    print("Getting")
+    return json.dumps(routing.routing_to_address)
 
 # Receive the address of a node on the network, check if it is in its own routing table and adds it
 @app.route("/est", methods=["POST"])
@@ -34,6 +43,9 @@ def connect(address):
     first = url.find("/") + 2
     end = first + url[first:].find("/")
     routing.check_address(response.text, url[first:end])
+    get_all(address)
+
+def get_all(address):
     routing_table = requests.get(f"http://{address}/routingTable").content
     routing_table = json.loads(routing_table)
     for guid in routing_table:
