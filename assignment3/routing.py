@@ -1,3 +1,5 @@
+import time
+
 class RoutingTable:
     def __init__(self):
         self.host = None
@@ -22,7 +24,10 @@ class RoutingTable:
 
     # Send a heartbeat at a set time interval
     def send_heartbeat(self):
-        pass
+        while True:
+            for address in self.get_ID():
+                print(address)
+            time.sleep(1)
 
     # Process a given heartbeat
     # This function controls which nodes have sent a heartbeat
@@ -34,9 +39,9 @@ class RoutingTable:
         pass
 
     # Return the ID of a node given the address
-    def get_ID(self, address):
-        return self.routing_to_ID[address]
+    def get_ID(self):
+        return self.routing_to_ID
 
     # Return the address of a node given the ID
-    def get_address(self, ID):
-        return self.routing_to_address[ID]
+    def get_address(self):
+        return self.routing_to_address

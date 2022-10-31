@@ -4,10 +4,9 @@ from routing import RoutingTable
 import requests
 import uuid
 import json
+from multiprocessing import Process
 
 app = Flask(__name__)
-
-routing = RoutingTable()
 
 @app.route("/")
 def index():
@@ -56,6 +55,8 @@ def get_all(address):
         print(i)
    
 if __name__ == "__main__":
+    routing = RoutingTable()
+    p = Process(target=routing.send_heartbeat)
     # Insert the sockets
     parser = ArgumentParser()
     parser.add_argument('-host')
@@ -73,6 +74,8 @@ if __name__ == "__main__":
     if args.r is not None:
         connect(args.r)
     host = args.host.split(":")
+    
+    p.start()
     app.run(host=host[0], port=host[1])
-
+    p.terminate()
 
