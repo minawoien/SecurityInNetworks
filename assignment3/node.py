@@ -1,6 +1,7 @@
 from flask import Flask, request
 from argparse import ArgumentParser
 from routing import RoutingTable
+from hashTable import HashTable
 import requests
 import uuid
 import json
@@ -12,9 +13,11 @@ app = Flask(__name__)
 def index():
     return app.send_static_file("index.html")
 
-@app.route("/uploadFile")
+@app.route("/uploadFile", methods=["POST"])
 def upload():
-    print("Hello")
+    file = request.files['file']
+    hash = dht.create_hash(file)
+    dht.add(routing.guid, routing.host, hash, file.filename)
     return app.send_static_file("index.html")
 
 @app.route("/getNodes", methods=["GET"])
@@ -56,6 +59,7 @@ def get_all(address):
    
 if __name__ == "__main__":
     routing = RoutingTable()
+    dht = HashTable()
     p = Process(target=routing.send_heartbeat)
     # Insert the sockets
     parser = ArgumentParser()
@@ -75,7 +79,7 @@ if __name__ == "__main__":
         connect(args.r)
     host = args.host.split(":")
     
-    p.start()
+    # p.start()
     app.run(host=host[0], port=host[1])
-    p.terminate()
+    # p.terminate()
 

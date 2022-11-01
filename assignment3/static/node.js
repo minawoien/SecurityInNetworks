@@ -18,7 +18,13 @@ window.onload = function(){
 }
 
 async function uploadFile(){
-    let response = await fetch("/uploadFile");
+    let file = document.getElementById("uploadedFile").files[0];
+    let formData = new FormData();
+    formData.append("file", file)
+    let response = await fetch("/uploadFile", {
+        method: 'POST',
+        body: formData
+    });
     if (response.status == 200){
         console.log("hell")
     }
