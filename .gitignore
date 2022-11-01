@@ -1,4 +1,4 @@
 .[Dd]s_store
-file.txt
-file2.txt
 **/__pycache__/
+[Vv]env/
+[Rr]esources/
