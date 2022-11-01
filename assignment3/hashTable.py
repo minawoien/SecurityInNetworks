@@ -6,8 +6,10 @@ class HashTable:
     
     # Add a node to the hash table with it's public key, the filename and hash
     def add(self, guid, pu_k, hash, filename):
-        self.hashTable[guid] = (pu_k, {filename: hash})
-        print(self.hashTable)
+        if guid not in self.hashTable:
+            self.hashTable[guid] = (pu_k, {filename: hash})
+        else:
+            self.hashTable[guid][1][filename] = hash
 
     # Remove a node from the hash table when it leaves the network
     def remove_node(GUID):
