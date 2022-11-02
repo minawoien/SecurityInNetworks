@@ -15,6 +15,7 @@ app = Flask(__name__)
 def index():
     return app.send_static_file("index.html")
 
+# Route to upload file, add it to the hash table and share it with the nodes in the routing table
 @app.route("/uploadFile", methods=["POST"])
 def upload():
     file = request.files['file']
@@ -23,78 +24,84 @@ def upload():
     updated_dht()
     return app.send_static_file("index.html")
 
+# Route to update the DHT
 @app.route("/getdht", methods=["POST"])
 def get_dht():
     data = request.get_json()['file']
     dht.update_table(data)
     return routing.host
 
+# Route to routing table 
 @app.route("/getNodes", methods=["GET"])
 def getNodes():
     return json.dumps(routing.routing_to_address.copy())
 
+# Route to hash table
 @app.route("/getHashTable", methods=["GET"])
 def getHashTable():
-    return json.dumps(dht.hashTable)
+    return json.dumps(dht.hashTable.copy())
 
 # Receive the address of a node on the network, check if it is in its own routing table and adds it
 @app.route("/est", methods=["POST"])
 def establish_con():
     data = request.get_json()
     routing.check_address(data["guid"], data["address"])
-    for i in routing.routing_to_ID.keys():
-        print(i)
     return routing.guid
 
+# Route to heartbeat
 @app.route("/heartbeat", methods=["GET"])
 def receive_heartbeat():
     return "ok"
 
 # Connect with the remote host and sends its own address
+# Add the remote host to the routing table
 def connect(address):
     response = requests.post(f"http://{address}/est", json={"address": routing.host, "guid": routing.guid})
     url = response.url
     first = url.find("/") + 2
     end = first + url[first:].find("/")
     routing.check_address(response.text, url[first:end])
-    share_tables(address, 'getNodes')
-    share_tables(address, 'getHashTable')
+    share_table(address)
+    request_hash_table(address)
 
-
-def share_tables(address, route):
-    table = requests.get(f"http://{address}/{route}").content
+# Get the routing table of the remote host and share it with every node in the host's routing table
+def share_table(address):
+    table = requests.get(f"http://{address}/getNodes").content
     table = json.loads(table)
     for guid in table:
-        if route == 'getNodes':
-            new_address = routing.check_address(guid, table[guid])
-            if new_address:
-                requests.post(f"http://{new_address}/est", json={"address": routing.host, "guid": routing.guid})
-        else:
-            dht.update_table(table)       
+        new_address = routing.check_address(guid, table[guid])
+        if new_address:
+            requests.post(f"http://{new_address}/est", json={"address": routing.host, "guid": routing.guid})
+
+# Request the hash table from the remote host nodes
+def request_hash_table(address):
+    table = requests.get(f"http://{address}/getHashTable").content
+    table = json.loads(table)
+    dht.update_table(table)       
 
 def updated_dht():
     for address in routing.routing_to_ID.keys():
         if address != routing.host:
-            requests.post(f"http://{address}/getdht", json={"file": dht.hashTable})
+            requests.post(f"http://{address}/getdht", json={"file": dht.hashTable.copy()})
 
-# Send a heartbeat at a set time interval
-def send_heartbeat(routing):
+
+# Send a heartbeat to each node in the host's routing table at a set time interval
+def send_heartbeat(routing, dht):
     while True:
         for address in routing.routing_to_ID.keys():
             if address != routing.host:
                 try:
                     response = requests.get(f"http://{address}/heartbeat").content
-                    print(response)
                 except:
-                    print("connection failed")
+                    dht.remove_node(routing.routing_to_ID[address])
                     routing.process_heartbeat(address)
-        time.sleep(10)
+        time.sleep(5)
 
 if __name__ == "__main__":
     routing = RoutingTable()
     dht = HashTable()
 
-    # Insert the sockets
+    # Insert the host and a remote host
     parser = ArgumentParser()
     parser.add_argument('-host')
     parser.add_argument('-r')
@@ -112,7 +119,10 @@ if __name__ == "__main__":
         connect(args.r)
     host = args.host.split(":")
 
-    p = Process(target=send_heartbeat, args=(routing, ))
+    # Start a process that runs in the background
+    # This process runs the function send_heartbeat to send heartbeats to each node in a given time interval
+    # It takes in the routing class to know when the routing table has changed
+    p = Process(target=send_heartbeat, args=(routing, dht, ))
     p.start()
     app.run(host=host[0], port=host[1])
     p.terminate()

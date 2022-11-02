@@ -1,8 +1,10 @@
 import hashlib
+from multiprocessing import Manager
 
 class HashTable:
     def __init__(self):
-        self.hashTable = {}
+        m = Manager()
+        self.hashTable = m.dict()
     
     # Add a node to the hash table with it's public key, the filename and hash
     def add(self, guid, pu_k, hash, filename):
@@ -20,8 +22,8 @@ class HashTable:
                 self.add(guid, pu_k, files[filename], filename)
 
     # Remove a node from the hash table when it leaves the network
-    def remove_node(GUID):
-        pass
+    def remove_node(self, guid):
+        del self.hashTable[guid]
 
     # Check if a file already is uploaded
     def find_filename(self, filename):
