@@ -46,6 +46,10 @@ def establish_con():
 def get_routingTable():
     return routing.routing_to_address.copy()
 
+@app.route("/heartbeat", methods=["GET"])
+def receive_heartbeat():
+    return "ok"
+
 # Connect with the remote host and sends its own address
 def connect(address):
     response = requests.post(f"http://{address}/est", json={"address": routing.host, "guid": routing.guid})
@@ -73,8 +77,13 @@ def updated_dht():
 # Send a heartbeat at a set time interval
 def send_heartbeat(routing):
     while True:
-        for address in routing.keys():
-            print(address)
+        for address in routing.routing_to_ID.keys():
+            if address != routing.host:
+                try:
+                    response = requests.get(f"http://{address}/heartbeat").content
+                    print(response)
+                except:
+                    print("connection failed")
         time.sleep(1)
 
 if __name__ == "__main__":
@@ -99,7 +108,7 @@ if __name__ == "__main__":
         connect(args.r)
     host = args.host.split(":")
 
-    p = Process(target=send_heartbeat, args=(routing.routing_to_ID,))
+    p = Process(target=send_heartbeat, args=(routing, ))
     p.start()
     app.run(host=host[0], port=host[1])
     p.terminate()
