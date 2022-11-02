@@ -25,8 +25,8 @@ def upload():
 
 @app.route("/getdht", methods=["POST"])
 def get_dht():
-    data = request.get_json()
-    print(data)
+    data = request.get_json()['file']
+    dht.update_table(data)
     return routing.host
 
 @app.route("/getNodes", methods=["GET"])
@@ -57,17 +57,20 @@ def connect(address):
     first = url.find("/") + 2
     end = first + url[first:].find("/")
     routing.check_address(response.text, url[first:end])
-    share_tables(address)
+    share_tables(address, 'getNodes')
+    share_tables(address, 'getHashTable')
 
-def share_tables(address):
-    routing_table = requests.get(f"http://{address}/getNodes").content
-    routing_table = json.loads(routing_table)
-    for guid in routing_table:
-        new_address = routing.check_address(guid, routing_table[guid])
-        if new_address:
-            requests.post(f"http://{new_address}/est", json={"address": routing.host, "guid": routing.guid})
-    for i in routing.routing_to_ID.keys():
-        print(i)
+
+def share_tables(address, route):
+    table = requests.get(f"http://{address}/{route}").content
+    table = json.loads(table)
+    for guid in table:
+        if route == 'getNodes':
+            new_address = routing.check_address(guid, table[guid])
+            if new_address:
+                requests.post(f"http://{new_address}/est", json={"address": routing.host, "guid": routing.guid})
+        else:
+            dht.update_table(table)       
 
 def updated_dht():
     for address in routing.routing_to_ID.keys():

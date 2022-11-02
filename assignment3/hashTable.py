@@ -10,6 +10,14 @@ class HashTable:
             self.hashTable[guid] = (pu_k, {filename: hash})
         else:
             self.hashTable[guid][1][filename] = hash
+    
+    # Update hash table when the hash table of another node is received
+    def update_table(self, table):
+        for guid in table:
+            pu_k = table[guid][0]
+            files = table[guid][1]
+            for filename in files:
+                self.add(guid, pu_k, files[filename], filename)
 
     # Remove a node from the hash table when it leaves the network
     def remove_node(GUID):
