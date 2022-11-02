@@ -1,11 +1,12 @@
-import time
+from multiprocessing import Manager
 
 class RoutingTable:
     def __init__(self):
         self.host = None
         self.guid = None
-        self.routing_to_address = {}
-        self.routing_to_ID = {}
+        m = Manager()
+        self.routing_to_address = m.dict()
+        self.routing_to_ID = m.dict()
     
     # Set the address to the routing table
     def set_address(self, guid, address):
@@ -21,13 +22,6 @@ class RoutingTable:
             self.set_guid(address, guid)
             return address
         return False
-
-    # Send a heartbeat at a set time interval
-    def send_heartbeat(self):
-        while True:
-            for address in self.get_ID():
-                print(address)
-            time.sleep(1)
 
     # Process a given heartbeat
     # This function controls which nodes have sent a heartbeat
