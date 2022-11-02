@@ -1,3 +1,4 @@
+from crypt import methods
 import time
 from flask import Flask, request
 from argparse import ArgumentParser
@@ -30,8 +31,11 @@ def get_dht():
 
 @app.route("/getNodes", methods=["GET"])
 def getNodes():
-    print("Getting")
     return json.dumps(routing.routing_to_address.copy())
+
+@app.route("/getHashTable", methods=["GET"])
+def getHashTable():
+    return json.dumps(dht.hashTable)
 
 # Receive the address of a node on the network, check if it is in its own routing table and adds it
 @app.route("/est", methods=["POST"])
@@ -41,10 +45,6 @@ def establish_con():
     for i in routing.routing_to_ID.keys():
         print(i)
     return routing.guid
-
-@app.route("/routingTable", methods=["GET"])
-def get_routingTable():
-    return routing.routing_to_address.copy()
 
 @app.route("/heartbeat", methods=["GET"])
 def receive_heartbeat():
@@ -60,7 +60,7 @@ def connect(address):
     share_tables(address)
 
 def share_tables(address):
-    routing_table = requests.get(f"http://{address}/routingTable").content
+    routing_table = requests.get(f"http://{address}/getNodes").content
     routing_table = json.loads(routing_table)
     for guid in routing_table:
         new_address = routing.check_address(guid, routing_table[guid])
@@ -84,7 +84,8 @@ def send_heartbeat(routing):
                     print(response)
                 except:
                     print("connection failed")
-        time.sleep(1)
+                    routing.process_heartbeat(address)
+        time.sleep(10)
 
 if __name__ == "__main__":
     routing = RoutingTable()

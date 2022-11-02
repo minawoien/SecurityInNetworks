@@ -25,12 +25,10 @@ class RoutingTable:
 
     # Process a given heartbeat
     # This function controls which nodes have sent a heartbeat
-    def process_heartbeat(self):
-        pass
-
-    # Remove a node from the network
-    def remove_node(self):
-        pass
+    def process_heartbeat(self, address):
+        guid = self.routing_to_ID[address]
+        del self.routing_to_ID[address]
+        del self.routing_to_address[guid]
 
     # Return the ID of a node given the address
     def get_ID(self):
