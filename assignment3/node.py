@@ -31,7 +31,7 @@ def get_dht():
 @app.route("/getNodes", methods=["GET"])
 def getNodes():
     print("Getting")
-    return json.dumps(routing.routing_to_address)
+    return json.dumps(routing.routing_to_address.copy())
 
 # Receive the address of a node on the network, check if it is in its own routing table and adds it
 @app.route("/est", methods=["POST"])
