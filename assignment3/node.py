@@ -8,6 +8,7 @@ import requests
 import uuid
 import json
 from multiprocessing import Process
+from secure_communication import DiffieHellman, BBS, SymmetricCipher
 
 app = Flask(__name__)
 
