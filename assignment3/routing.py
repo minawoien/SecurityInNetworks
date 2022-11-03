@@ -31,9 +31,10 @@ class RoutingTable:
         del self.routing_to_address[guid]
 
     # Return the ID of a node given the address
-    def get_ID(self):
-        return self.routing_to_ID
+    def get_ID(self, address):
+        return self.routing_to_ID[address]
 
     # Return the address of a node given the ID
-    def get_address(self):
-        return self.routing_to_address
+    def get_address(self, guid):
+        print(guid)
+        return self.routing_to_address[guid]

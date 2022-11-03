@@ -24,11 +24,20 @@ def upload():
     updated_dht()
     return app.send_static_file("index.html")
 
+# Route to request file from the node containing the hash
+# Use the guid of the node to get the address, and requests the file from it's filename
 @app.route("/requestFile", methods=["POST"])
 def request_file():
     data = request.get_json()
-    print(data)
+    address = routing.get_address(data['guid'])
+    response = requests.post(f"http://{address}/getFile", json={"filename": data['filename']})
     return app.send_static_file("index.html")
+
+# Route to send file to the requesting node
+@app.route("/getFile", methods=["POST"])
+def getFile():
+    filename = request.get_json()['filename']
+    return "Hello"
 
 # Route to update the DHT
 @app.route("/getdht", methods=["POST"])
@@ -101,7 +110,7 @@ def send_heartbeat(routing, dht):
                 except:
                     dht.remove_node(routing.routing_to_ID[address])
                     routing.process_heartbeat(address)
-        time.sleep(5)
+        time.sleep(10)
 
 if __name__ == "__main__":
     routing = RoutingTable()
