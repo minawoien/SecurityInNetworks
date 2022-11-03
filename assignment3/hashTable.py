@@ -9,9 +9,13 @@ class HashTable:
     # Add a node to the hash table with it's public key, the filename and hash
     def add(self, guid, pu_k, hash, filename):
         if guid not in self.hashTable:
-            self.hashTable[guid] = (pu_k, {filename: hash})
+            print("guid not in hashTable")
+            self.hashTable[guid] = [pu_k, {filename: hash}]
         else:
+            # !Funker ikke
+            print(self.hashTable[guid][1])
             self.hashTable[guid][1][filename] = hash
+            print(self.hashTable)
     
     # Update hash table when the hash table of another node is received
     def update_table(self, table):
@@ -39,3 +43,6 @@ class HashTable:
             chunk = file.read(1024)
             h.update(chunk)
         return h.hexdigest()
+    
+    def get_pu_k(self, guid):
+        return self.hashTable[guid][0]

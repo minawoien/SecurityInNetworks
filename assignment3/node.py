@@ -22,11 +22,14 @@ def index():
 def upload():
     file = request.files['file']
     # Endre til guid
-    os.mkdir(routing.host)
+    try:
+        os.mkdir(f"files/{routing.host}")
+    except FileExistsError:
+        pass
     content = file.read()
     open(f"files/{routing.host}/{file.filename}", 'wb').write(content)
     hash = dht.create_hash(file)
-    dht.add(routing.guid, routing.host, hash, file.filename)
+    dht.add(routing.guid, public_key, hash, file.filename)
     updated_dht()
     return app.send_static_file("index.html")
 
@@ -36,15 +39,24 @@ def upload():
 def request_file():
     data = request.get_json()
     address = routing.get_address(data['guid'])
-    response = requests.post(f"http://{address}/getFile", json={"filename": data['filename']})
+    response = requests.post(f"http://{address}/getFile", json={"filename": data['filename'], "public_key":public_key})
+    pu_k = dht.get_pu_k(data['guid'])
+    secret_key = generate_secret_key(pu_k)
     return app.send_static_file("index.html")
 
-# Route to send file to the requesting node
+# Route to send file to the requesting node, receive public key from requesting node
 @app.route("/getFile", methods=["POST"])
 def getFile():
     filename = request.get_json()['filename']
+    received_pu_k = request.get_json()['public_key']
+    secret_key = generate_secret_key(received_pu_k)
     dht.find_file(filename, routing.guid)
     return "Hello"
+
+def generate_secret_key(pu_k):
+    shared_key = dh.generate_shared_key(private_key, pu_k)
+    bbs = BBS(shared_key)
+    return bbs.generate_key(16*8)
 
 # Route to update the DHT
 @app.route("/getdht", methods=["POST"])
@@ -140,6 +152,12 @@ if __name__ == "__main__":
     if args.r is not None:
         connect(args.r)
     host = args.host.split(":")
+
+    # Create private and public key for file sharing with the use of Diffie Hellman
+    dh = DiffieHellman()
+    private_key = dh.generate_private_key()
+    public_key = dh.generate_public_key(private_key)
+    print(public_key)
 
     # Start a process that runs in the background
     # This process runs the function send_heartbeat to send heartbeats to each node in a given time interval
