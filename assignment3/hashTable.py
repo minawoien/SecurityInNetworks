@@ -8,11 +8,8 @@ class HashTable:
     
     # Add a node to the hash table with it's public key, the filename and hash
     def add(self, guid, pu_k, hash, filename):
-
-        print(filename)
         if guid not in self.hashTable:
             self.hashTable[guid] = (pu_k, {filename: hash})
-            {guid: (pu_k, {filename: hash})}
         else:
             pk,files = self.hashTable[guid]
             files[filename]= hash
@@ -30,12 +27,6 @@ class HashTable:
     # Remove a node from the hash table when it leaves the network
     def remove_node(self, guid):
         del self.hashTable[guid]
-
-    # Check if a file already is uploaded
-    def find_file(self, filename, guid):
-        for file in self.hashTable[guid][1]:
-            if file == filename:
-                return self.hashTable[guid][1][filename]
 
     # From Python Program to find hash
     def create_hash(self, file):

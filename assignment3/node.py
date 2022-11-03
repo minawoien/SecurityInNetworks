@@ -9,6 +9,7 @@ import json
 from multiprocessing import Process
 from secure_communication import DiffieHellman, BBS, SymmetricCipher
 import os
+from werkzeug.datastructures import FileStorage
 
 app = Flask(__name__)
 
@@ -39,9 +40,21 @@ def upload():
 def request_file():
     data = request.get_json()
     address = routing.get_address(data['guid'])
-    response = requests.post(f"http://{address}/getFile", json={"filename": data['filename'], "public_key":public_key})
+    response = requests.post(f"http://{address}/getFile", json={"filename": data['filename'], "public_key":public_key}).content
+    #data = eval(data["msg"])
     pu_k = dht.get_pu_k(data['guid'])
     secret_key = generate_secret_key(pu_k)
+    received_file = cipher.decrypt(response, secret_key)
+    try:
+        os.mkdir(f"files/{routing.host}")
+    except FileExistsError:
+        pass
+    with open(f'files/{routing.host}/{data["filename"]}', "w") as file:
+        file.write(received_file)
+    with open(f'files/{routing.host}/{data["filename"]}', "rb") as file:
+        hash = dht.create_hash(file)
+    dht.add(routing.guid, public_key, hash, data["filename"])
+    updated_dht()
     return app.send_static_file("index.html")
 
 # Route to send file to the requesting node, receive public key from requesting node
@@ -50,8 +63,10 @@ def getFile():
     filename = request.get_json()['filename']
     received_pu_k = request.get_json()['public_key']
     secret_key = generate_secret_key(received_pu_k)
-    dht.find_file(filename, routing.guid)
-    return "Hello"
+    with open(f'files/{routing.host}/{filename}') as file:
+        text = file.read()
+    encrypted_file = cipher.encrypt(bytes(text, "UTF-8"), secret_key)
+    return encrypted_file
 
 def generate_secret_key(pu_k):
     shared_key = dh.generate_shared_key(private_key, pu_k)
@@ -134,6 +149,7 @@ def send_heartbeat(routing, dht):
 if __name__ == "__main__":
     routing = RoutingTable()
     dht = HashTable()
+    cipher = SymmetricCipher()
 
     # Insert the host and a remote host
     parser = ArgumentParser()
@@ -157,7 +173,6 @@ if __name__ == "__main__":
     dh = DiffieHellman()
     private_key = dh.generate_private_key()
     public_key = dh.generate_public_key(private_key)
-    print(public_key)
 
     # Start a process that runs in the background
     # This process runs the function send_heartbeat to send heartbeats to each node in a given time interval
