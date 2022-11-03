@@ -26,8 +26,10 @@ class HashTable:
         del self.hashTable[guid]
 
     # Check if a file already is uploaded
-    def find_filename(self, filename):
-        pass
+    def find_file(self, filename, guid):
+        for file in self.hashTable[guid][1]:
+            if file == filename:
+                return self.hashTable[guid][1][filename]
 
     # From Python Program to find hash
     def create_hash(self, file):

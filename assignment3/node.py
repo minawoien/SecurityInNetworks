@@ -37,6 +37,7 @@ def request_file():
 @app.route("/getFile", methods=["POST"])
 def getFile():
     filename = request.get_json()['filename']
+    dht.find_file(filename, routing.guid)
     return "Hello"
 
 # Route to update the DHT
