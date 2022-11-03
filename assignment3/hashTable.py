@@ -8,14 +8,16 @@ class HashTable:
     
     # Add a node to the hash table with it's public key, the filename and hash
     def add(self, guid, pu_k, hash, filename):
+
+        print(filename)
         if guid not in self.hashTable:
-            print("guid not in hashTable")
-            self.hashTable[guid] = [pu_k, {filename: hash}]
+            self.hashTable[guid] = (pu_k, {filename: hash})
+            {guid: (pu_k, {filename: hash})}
         else:
-            # !Funker ikke
-            print(self.hashTable[guid][1])
-            self.hashTable[guid][1][filename] = hash
-            print(self.hashTable)
+            pk,files = self.hashTable[guid]
+            files[filename]= hash
+            self.hashTable[guid] = (pk,files)
+
     
     # Update hash table when the hash table of another node is received
     def update_table(self, table):
