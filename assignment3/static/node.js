@@ -5,7 +5,7 @@ async function getTables(route, id){
         for (let [key, value] of Object.entries(result)){
             if (typeof(value) == "object"){
                 for (let [filename, hash] of Object.entries(value[1])){
-                    document.getElementById(id).innerHTML += '<tr><td>'+key+'</td><td>'+value[0]+'</td><td>'+filename+'</td><td>'+hash+'</td><td><input type="submit" value="x" onclick="request();"></td></td></tr>';
+                    document.getElementById(id).innerHTML += '<tr id='+key+filename+'><td>'+key+'</td><td>'+value[0]+'</td><td>'+filename+'</td><td>'+hash+'</td><td><input type="submit" value="x" onclick="request(this.parentNode.parentNode.id);"></td></td></tr>';
                 }
             }else {
                 document.getElementById(id).innerHTML += '<tr><td>'+key+'</td><td>'+value+'</td></tr>';
@@ -14,8 +14,20 @@ async function getTables(route, id){
     }
 }
 
-async function request(key){
-    console.log(key)
+async function request(id){
+    guid = id.substring(0,36)
+    filename = id.substring(36)
+    let response = await fetch('/requestFile', {
+        method: 'POST',
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({guid: guid, filename: filename})
+    });
+    if (response.status == 200){
+        console.log("File added to DHT")
+        location.reload()
+    }
 }
 
 

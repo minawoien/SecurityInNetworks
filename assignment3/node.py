@@ -24,6 +24,12 @@ def upload():
     updated_dht()
     return app.send_static_file("index.html")
 
+@app.route("/requestFile", methods=["POST"])
+def request_file():
+    data = request.get_json()
+    print(data)
+    return app.send_static_file("index.html")
+
 # Route to update the DHT
 @app.route("/getdht", methods=["POST"])
 def get_dht():
