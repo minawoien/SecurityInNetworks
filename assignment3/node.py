@@ -1,4 +1,3 @@
-from crypt import methods
 import time
 from flask import Flask, request
 from argparse import ArgumentParser
@@ -9,6 +8,7 @@ import uuid
 import json
 from multiprocessing import Process
 from secure_communication import DiffieHellman, BBS, SymmetricCipher
+import os
 
 app = Flask(__name__)
 
@@ -16,10 +16,15 @@ app = Flask(__name__)
 def index():
     return app.send_static_file("index.html")
 
-# Route to upload file, add it to the hash table and share it with the nodes in the routing table
+# Route to upload file, and save it
+# Add it to the hash table and share it with the nodes in the routing table
 @app.route("/uploadFile", methods=["POST"])
 def upload():
     file = request.files['file']
+    # Endre til guid
+    os.mkdir(routing.host)
+    content = file.read()
+    open(f"files/{routing.host}/{file.filename}", 'wb').write(content)
     hash = dht.create_hash(file)
     dht.add(routing.guid, routing.host, hash, file.filename)
     updated_dht()
