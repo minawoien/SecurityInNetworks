@@ -9,7 +9,6 @@ import json
 from multiprocessing import Process
 from secure_communication import DiffieHellman, BBS, SymmetricCipher
 import os
-from werkzeug.datastructures import FileStorage
 
 app = Flask(__name__)
 
@@ -41,7 +40,6 @@ def request_file():
     data = request.get_json()
     address = routing.get_address(data['guid'])
     response = requests.post(f"http://{address}/getFile", json={"filename": data['filename'], "public_key":public_key}).content
-    #data = eval(data["msg"])
     pu_k = dht.get_pu_k(data['guid'])
     secret_key = generate_secret_key(pu_k)
     received_file = cipher.decrypt(response, secret_key)
@@ -133,7 +131,6 @@ def updated_dht():
         if address != routing.host:
             requests.post(f"http://{address}/getdht", json={"file": dht.hashTable.copy()})
 
-
 # Send a heartbeat to each node in the host's routing table at a set time interval
 def send_heartbeat(routing, dht):
     while True:
@@ -144,7 +141,7 @@ def send_heartbeat(routing, dht):
                 except:
                     dht.remove_node(routing.routing_to_ID[address])
                     routing.process_heartbeat(address)
-        time.sleep(10)
+        time.sleep(5)
 
 if __name__ == "__main__":
     routing = RoutingTable()

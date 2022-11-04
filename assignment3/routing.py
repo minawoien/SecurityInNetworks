@@ -8,10 +8,11 @@ class RoutingTable:
         self.routing_to_address = m.dict()
         self.routing_to_ID = m.dict()
     
-    # Set the address to the routing table
+    # Set the guid and address in the routing table with guid as key
     def set_address(self, guid, address):
         self.routing_to_address[guid] = address
     
+    # Set the guid and address in the routing table with address as key
     def set_guid(self, address, guid):
         self.routing_to_ID[address] = guid
 
@@ -24,15 +25,11 @@ class RoutingTable:
         return False
 
     # Process a given heartbeat
-    # This function controls which nodes have sent a heartbeat
+    # Delete the node from the routing table as the host did not get a response at the heartbeat
     def process_heartbeat(self, address):
         guid = self.routing_to_ID[address]
         del self.routing_to_ID[address]
         del self.routing_to_address[guid]
-
-    # Return the ID of a node given the address
-    def get_ID(self, address):
-        return self.routing_to_ID[address]
 
     # Return the address of a node given the ID
     def get_address(self, guid):
