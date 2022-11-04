@@ -1,14 +1,11 @@
-import time
 from flask import Flask, request
 from argparse import ArgumentParser
 from routing import RoutingTable
 from hashTable import HashTable
-import requests
-import uuid
-import json
+import requests, uuid, json, os
 from multiprocessing import Process
-from secure_communication import DiffieHellman, BBS, SymmetricCipher
-import os
+from secure_communication import DiffieHellman, SymmetricCipher
+from func import connect, updated_dht, generate_secret_key, send_heartbeat 
 
 app = Flask(__name__)
 
@@ -30,7 +27,7 @@ def upload():
     open(f"files/{routing.host}/{file.filename}", 'wb').write(content)
     hash = dht.create_hash(file)
     dht.add(routing.guid, public_key, hash, file.filename)
-    updated_dht()
+    updated_dht(routing, dht)
     return app.send_static_file("index.html")
 
 # Route to request file from the node containing the hash
@@ -41,7 +38,7 @@ def request_file():
     address = routing.get_address(data['guid'])
     response = requests.post(f"http://{address}/getFile", json={"filename": data['filename'], "public_key":public_key}).content
     pu_k = dht.get_pu_k(data['guid'])
-    secret_key = generate_secret_key(pu_k)
+    secret_key = generate_secret_key(pu_k, private_key, dh)
     received_file = cipher.decrypt(response, secret_key)
     try:
         os.mkdir(f"files/{routing.host}")
@@ -52,7 +49,7 @@ def request_file():
     with open(f'files/{routing.host}/{data["filename"]}', "rb") as file:
         hash = dht.create_hash(file)
     dht.add(routing.guid, public_key, hash, data["filename"])
-    updated_dht()
+    updated_dht(routing, dht)
     return app.send_static_file("index.html")
 
 # Route to send file to the requesting node, receive public key from requesting node
@@ -60,16 +57,11 @@ def request_file():
 def getFile():
     filename = request.get_json()['filename']
     received_pu_k = request.get_json()['public_key']
-    secret_key = generate_secret_key(received_pu_k)
+    secret_key = generate_secret_key(received_pu_k, private_key, dh)
     with open(f'files/{routing.host}/{filename}') as file:
         text = file.read()
     encrypted_file = cipher.encrypt(bytes(text, "UTF-8"), secret_key)
     return encrypted_file
-
-def generate_secret_key(pu_k):
-    shared_key = dh.generate_shared_key(private_key, pu_k)
-    bbs = BBS(shared_key)
-    return bbs.generate_key(16*8)
 
 # Route to update the DHT
 @app.route("/getdht", methods=["POST"])
@@ -100,49 +92,6 @@ def establish_con():
 def receive_heartbeat():
     return "ok"
 
-# Connect with the remote host and sends its own address
-# Add the remote host to the routing table
-def connect(address):
-    response = requests.post(f"http://{address}/est", json={"address": routing.host, "guid": routing.guid})
-    url = response.url
-    first = url.find("/") + 2
-    end = first + url[first:].find("/")
-    routing.check_address(response.text, url[first:end])
-    share_table(address)
-    request_hash_table(address)
-
-# Get the routing table of the remote host and share it with every node in the host's routing table
-def share_table(address):
-    table = requests.get(f"http://{address}/getNodes").content
-    table = json.loads(table)
-    for guid in table:
-        new_address = routing.check_address(guid, table[guid])
-        if new_address:
-            requests.post(f"http://{new_address}/est", json={"address": routing.host, "guid": routing.guid})
-
-# Request the hash table from the remote host nodes
-def request_hash_table(address):
-    table = requests.get(f"http://{address}/getHashTable").content
-    table = json.loads(table)
-    dht.update_table(table)       
-
-def updated_dht():
-    for address in routing.routing_to_ID.keys():
-        if address != routing.host:
-            requests.post(f"http://{address}/getdht", json={"file": dht.hashTable.copy()})
-
-# Send a heartbeat to each node in the host's routing table at a set time interval
-def send_heartbeat(routing, dht):
-    while True:
-        for address in routing.routing_to_ID.keys():
-            if address != routing.host:
-                try:
-                    response = requests.get(f"http://{address}/heartbeat").content
-                except:
-                    dht.remove_node(routing.routing_to_ID[address])
-                    routing.process_heartbeat(address)
-        time.sleep(5)
-
 if __name__ == "__main__":
     routing = RoutingTable()
     dht = HashTable()
@@ -163,7 +112,7 @@ if __name__ == "__main__":
 
     # If a remote host is added as parameter, the host will try to connect with the remote host
     if args.r is not None:
-        connect(args.r)
+        connect(args.r, routing, dht)
     host = args.host.split(":")
 
     # Create private and public key for file sharing with the use of Diffie Hellman
@@ -173,7 +122,7 @@ if __name__ == "__main__":
 
     # Start a process that runs in the background
     # This process runs the function send_heartbeat to send heartbeats to each node in a given time interval
-    # It takes in the routing class to know when the routing table has changed
+    # It takes in the routing and DHT class to know when the tables have changed
     p = Process(target=send_heartbeat, args=(routing, dht, ))
     p.start()
     app.run(host=host[0], port=host[1])
