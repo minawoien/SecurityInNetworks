@@ -27,7 +27,8 @@ class HashTable:
 
     # Remove a node from the hash table when it leaves the network
     def remove_node(self, guid):
-        del self.hashTable[guid]
+        if guid in self.hashTable.keys():
+            del self.hashTable[guid]
 
     # Create the hash of a file with the SHA 1 hashing algorithm.
     # From 'Python Program to find hash', https://www.programiz.com/python-programming/examples/hash-file, (accessed: 01.11.22)
