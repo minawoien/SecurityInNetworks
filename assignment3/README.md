@@ -31,4 +31,5 @@ For example, the first node can start at the address: "127.0.0.1:8080" and the s
 `python3 node.py -host 127.0.0.1:8080`
 
 In another terminal enter:
+
 `python3 node.py -host 127.0.0.1:5001 -r 127.0.0.1:8080`
