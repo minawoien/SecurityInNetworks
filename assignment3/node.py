@@ -18,7 +18,7 @@ def index():
 @app.route("/uploadFile", methods=["POST"])
 def upload():
     file = request.files['file']
-    # Endre til guid
+    # Endre til uuid
     try:
         os.mkdir(f"files/{routing.host}")
     except FileExistsError:
@@ -26,18 +26,18 @@ def upload():
     content = file.read()
     open(f"files/{routing.host}/{file.filename}", 'wb').write(content)
     hash = dht.create_hash(file)
-    dht.add(routing.guid, public_key, hash, file.filename)
+    dht.add(routing.uuid, public_key, hash, file.filename)
     updated_dht(routing, dht)
     return app.send_static_file("index.html")
 
 # Route to request file from the node containing the hash
-# Use the guid of the node to get the address, and requests the file from it's filename
+# Use the uuid of the node to get the address, and requests the file from it's filename
 @app.route("/requestFile", methods=["POST"])
 def request_file():
     data = request.get_json()
-    address = routing.get_address(data['guid'])
+    address = routing.get_address(data['uuid'])
     response = requests.post(f"http://{address}/getFile", json={"filename": data['filename'], "public_key":public_key}).content
-    pu_k = dht.get_pu_k(data['guid'])
+    pu_k = dht.get_pu_k(data['uuid'])
     secret_key = generate_secret_key(pu_k, private_key, dh)
     received_file = cipher.decrypt(response, secret_key)
     try:
@@ -48,7 +48,7 @@ def request_file():
         file.write(received_file)
     with open(f'files/{routing.host}/{data["filename"]}', "rb") as file:
         hash = dht.create_hash(file)
-    dht.add(routing.guid, public_key, hash, data["filename"])
+    dht.add(routing.uuid, public_key, hash, data["filename"])
     updated_dht(routing, dht)
     return app.send_static_file("index.html")
 
@@ -84,8 +84,8 @@ def getHashTable():
 @app.route("/est", methods=["POST"])
 def establish_con():
     data = request.get_json()
-    routing.check_address(data["guid"], data["address"])
-    return routing.guid
+    routing.check_address(data["uuid"], data["address"])
+    return routing.uuid
 
 # Route to heartbeat
 @app.route("/heartbeat", methods=["GET"])
@@ -104,11 +104,11 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Create a random UUID and add it with the address to the routing table
-    guid = str(uuid.uuid4())
-    routing.guid = guid
+    uuid = str(uuid.uuid4())
+    routing.uuid = uuid
     routing.host = args.host
-    routing.set_address(guid, args.host)
-    routing.set_guid(args.host, guid)
+    routing.set_address(uuid, args.host)
+    routing.set_uuid(args.host, uuid)
 
     # If a remote host is added as parameter, the host will try to connect with the remote host
     if args.r is not None:

@@ -4,7 +4,7 @@ import requests, json, time
 # Connect with the remote host and sends its own address
 # Add the remote host to the routing table
 def connect(address, routing, dht):
-    response = requests.post(f"http://{address}/est", json={"address": routing.host, "guid": routing.guid})
+    response = requests.post(f"http://{address}/est", json={"address": routing.host, "uuid": routing.uuid})
     routing.check_address(response.text, address)
     share_table(address, routing)
     request_hash_table(address, dht)
@@ -13,10 +13,10 @@ def connect(address, routing, dht):
 def share_table(address, routing):
     table = requests.get(f"http://{address}/getNodes").content
     table = json.loads(table)
-    for guid in table:
-        new_address = routing.check_address(guid, table[guid])
+    for uuid in table:
+        new_address = routing.check_address(uuid, table[uuid])
         if new_address:
-            requests.post(f"http://{new_address}/est", json={"address": routing.host, "guid": routing.guid})
+            requests.post(f"http://{new_address}/est", json={"address": routing.host, "uuid": routing.uuid})
 
 # Request the hash table from the remote host nodes
 def request_hash_table(address, dht):
