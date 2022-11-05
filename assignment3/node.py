@@ -98,6 +98,9 @@ if __name__ == "__main__":
     cipher = SymmetricCipher()
 
     # Insert the host and a remote host
+    # from Stackoverflow, "How to pass an arbitrary argument to flask through app.run()?",
+    # https://stackoverflow.com/questions/48346025/how-to-pass-an-arbitrary-argument-to-flask-through-app-run, 
+    # Mar 27, 2019. (accessed: Okt 20, 2022).
     parser = ArgumentParser()
     parser.add_argument('-host')
     parser.add_argument('-r')
