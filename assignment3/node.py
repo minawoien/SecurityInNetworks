@@ -5,7 +5,8 @@ from hashTable import HashTable
 import requests, uuid, json, os
 from multiprocessing import Process
 from secure_communication import DiffieHellman, SymmetricCipher
-from func import connect, updated_dht, generate_secret_key, send_heartbeat 
+from func import connect, updated_dht, generate_secret_key, send_heartbeat, allowed_file
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 
@@ -18,16 +19,19 @@ def index():
 @app.route("/uploadFile", methods=["POST"])
 def upload():
     file = request.files['file']
-    # Endre til uuid
-    try:
-        os.mkdir(f"files/{routing.host}")
-    except FileExistsError:
-        pass
-    content = file.read()
-    open(f"files/{routing.host}/{file.filename}", 'wb').write(content)
-    hash = dht.create_hash(file)
-    dht.add(routing.uuid, public_key, hash, file.filename)
-    updated_dht(routing, dht)
+    if allowed_file(file.filename):
+        # Endre til uuid
+        try:
+            os.mkdir(f"files/{routing.host}")
+        except FileExistsError:
+            pass
+        content = file.read()
+        filename = secure_filename(file.filename)
+        open(f"files/{routing.host}/{filename}", 'wb').write(content)
+        hash = dht.create_hash(file)
+        dht.add(routing.uuid, public_key, hash, filename)
+        updated_dht(routing, dht)
+        return app.send_static_file("index.html")
     return app.send_static_file("index.html")
 
 # Route to request file from the node containing the hash

@@ -1,5 +1,6 @@
 from secure_communication import BBS
 import requests, json, time
+ALLOWED_EXTENSIONS = {'txt'}
 
 # Connect with the remote host and sends its own address
 # Add the remote host to the routing table
@@ -46,3 +47,8 @@ def send_heartbeat(routing, dht):
                     dht.remove_node(routing.routing_to_ID[address])
                     routing.process_heartbeat(address)
         time.sleep(5)
+
+# Function that checks if the uploaded file is a txt
+# From Uploading files. https://flask.palletsprojects.com/en/2.2.x/patterns/fileuploads/. (accessed: Nov 6, 2022)
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS

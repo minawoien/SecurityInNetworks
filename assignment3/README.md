@@ -7,7 +7,7 @@ Install the required packages to run the code:
 "node.py" is the main file of the program. This file includes all the routes and is built based on "alice.py" and "bob.py" from assignment 2. This file includes the ArgumentParser class which is from Stackoverflow, "How to pass an arbitrary argument to flask through
 app.run()?", https://stackoverflow.com/questions/48346025/how-to-pass-an-arbitrary-argument-to-flask-through-app-run, Mar 27, 2019. (accessed: Okt 20, 2022).
 
-"func.py" contains extra functions for the program.
+"func.py" contains extra functions for the program. This file includes the function allowed_file() which is from "Uploading files", https://flask.palletsprojects.com/en/2.2.x/patterns/fileuploads/, (accessed: Nov 6, 2022)
 
 "hashTable.py" contains the Hash Table class which contains the DHT and all functions needed to add, access and delete files. This file includes the function "create_hash()" which is from 'Python Program to find hash', https://www.programiz.com/python-programming/examples/hash-file, (accessed: 01.11.22).
 
