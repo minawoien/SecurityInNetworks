@@ -106,4 +106,4 @@ class SymmetricCipher:
         ciphertext = ciphertext[8:]
         cipher = AES.new(key, AES.MODE_CTR, nonce=cipher_nonce)
         plaintext = cipher.decrypt(ciphertext)
-        return plaintext.decode("UTF-8")
+        return plaintext

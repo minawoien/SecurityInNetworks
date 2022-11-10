@@ -5,7 +5,7 @@ from hashTable import HashTable
 import requests, uuid, json, os
 from multiprocessing import Process
 from secure_communication import DiffieHellman, SymmetricCipher
-from func import connect, updated_dht, generate_secret_key, send_heartbeat, allowed_file
+from func import connect, updated_dht, generate_secret_key, send_heartbeat
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
@@ -19,19 +19,16 @@ def index():
 @app.route("/uploadFile", methods=["POST"])
 def upload():
     file = request.files['file']
-    if allowed_file(file.filename):
-        # Endre til uuid
-        try:
-            os.mkdir(f"files/{routing.host}")
-        except FileExistsError:
-            pass
-        content = file.read()
-        filename = secure_filename(file.filename)
-        open(f"files/{routing.host}/{filename}", 'wb').write(content)
-        hash = dht.create_hash(file)
-        dht.add(routing.uuid, public_key, hash, filename)
-        updated_dht(routing, dht)
-        return app.send_static_file("index.html")
+    try:
+        os.mkdir(f"files/{routing.host}")
+    except FileExistsError:
+        pass
+    content = file.read()
+    filename = secure_filename(file.filename)
+    open(f"files/{routing.host}/{filename}", 'wb').write(content)
+    hash = dht.create_hash(file)
+    dht.add(routing.uuid, public_key, hash, filename)
+    updated_dht(routing, dht)
     return app.send_static_file("index.html")
 
 # Route to request file from the node containing the hash
@@ -48,7 +45,7 @@ def request_file():
         os.mkdir(f"files/{routing.host}")
     except FileExistsError:
         pass
-    with open(f'files/{routing.host}/{data["filename"]}', "w") as file:
+    with open(f'files/{routing.host}/{data["filename"]}', "wb") as file:
         file.write(received_file)
     with open(f'files/{routing.host}/{data["filename"]}', "rb") as file:
         hash = dht.create_hash(file)
@@ -62,9 +59,9 @@ def getFile():
     filename = request.get_json()['filename']
     received_pu_k = request.get_json()['public_key']
     secret_key = generate_secret_key(received_pu_k, private_key, dh)
-    with open(f'files/{routing.host}/{filename}') as file:
+    with open(f'files/{routing.host}/{filename}', "rb") as file:
         text = file.read()
-    encrypted_file = cipher.encrypt(bytes(text, "UTF-8"), secret_key)
+    encrypted_file = cipher.encrypt(text, secret_key)
     return encrypted_file
 
 # Route to update the DHT
