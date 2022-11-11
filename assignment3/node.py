@@ -20,12 +20,12 @@ def index():
 def upload():
     file = request.files['file']
     try:
-        os.mkdir(f"files/{routing.host}")
+        os.mkdir(f"files/{routing.uuid}")
     except FileExistsError:
         pass
     content = file.read()
     filename = secure_filename(file.filename)
-    open(f"files/{routing.host}/{filename}", 'wb').write(content)
+    open(f"files/{routing.uuid}/{filename}", 'wb').write(content)
     hash = dht.create_hash(file)
     dht.add(routing.uuid, public_key, hash, filename)
     updated_dht(routing, dht)
@@ -42,12 +42,12 @@ def request_file():
     secret_key = generate_secret_key(pu_k, private_key, dh)
     received_file = cipher.decrypt(response, secret_key)
     try:
-        os.mkdir(f"files/{routing.host}")
+        os.mkdir(f"files/{routing.uuid}")
     except FileExistsError:
         pass
-    with open(f'files/{routing.host}/{data["filename"]}', "wb") as file:
+    with open(f'files/{routing.uuid}/{data["filename"]}', "wb") as file:
         file.write(received_file)
-    with open(f'files/{routing.host}/{data["filename"]}', "rb") as file:
+    with open(f'files/{routing.uuid}/{data["filename"]}', "rb") as file:
         hash = dht.create_hash(file)
     dht.add(routing.uuid, public_key, hash, data["filename"])
     updated_dht(routing, dht)
@@ -59,7 +59,7 @@ def getFile():
     filename = request.get_json()['filename']
     received_pu_k = request.get_json()['public_key']
     secret_key = generate_secret_key(received_pu_k, private_key, dh)
-    with open(f'files/{routing.host}/{filename}', "rb") as file:
+    with open(f'files/{routing.uuid}/{filename}', "rb") as file:
         text = file.read()
     encrypted_file = cipher.encrypt(text, secret_key)
     return encrypted_file
