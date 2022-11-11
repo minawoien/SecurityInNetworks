@@ -32,14 +32,19 @@ class HashTable:
 
     # Create the hash of a file with the SHA 1 hashing algorithm.
     # From 'Python Program to find hash', https://www.programiz.com/python-programming/examples/hash-file, (accessed: 01.11.22)
-    def create_hash(self, file):
+    def create_hash(self, filename, uuid):
         h = hashlib.sha1()
-        chunk = 0
-        while chunk != b'':
-            chunk = file.read(1024)
-            h.update(chunk)
+        with open(f"files/{uuid}/{filename}", 'rb') as file:
+            chunk = 0
+            while chunk != b'':
+                chunk = file.read(1024)
+                h.update(chunk)
         return h.hexdigest()
     
     # Get the public key for a node
     def get_pu_k(self, uuid):
         return self.hashTable[uuid][0]
+    
+    def get_hash(self, uuid, filename):
+        print("get hash")
+        return self.hashTable[uuid][1][filename]

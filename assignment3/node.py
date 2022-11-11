@@ -26,7 +26,7 @@ def upload():
     content = file.read()
     filename = secure_filename(file.filename)
     open(f"files/{routing.uuid}/{filename}", 'wb').write(content)
-    hash = dht.create_hash(file)
+    hash = dht.create_hash(filename, routing.uuid)
     dht.add(routing.uuid, public_key, hash, filename)
     updated_dht(routing, dht)
     return app.send_static_file("index.html")
@@ -47,8 +47,7 @@ def request_file():
         pass
     with open(f'files/{routing.uuid}/{data["filename"]}', "wb") as file:
         file.write(received_file)
-    with open(f'files/{routing.uuid}/{data["filename"]}', "rb") as file:
-        hash = dht.create_hash(file)
+    hash = dht.get_hash(data["uuid"], data["filename"])
     dht.add(routing.uuid, public_key, hash, data["filename"])
     updated_dht(routing, dht)
     return app.send_static_file("index.html")
