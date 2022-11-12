@@ -15,6 +15,10 @@ app.run()?", https://stackoverflow.com/questions/48346025/how-to-pass-an-arbitra
 
 "secure_communication.py" is the file created for assignment 2. This file includes the Diffie Hellman class, the BBS class and the Symmetric Cipher class used for generating keys and encrypt and decrypt files.
 
+"files" is an empty folder where the node's uploaded files will be stored in separate folders.
+
+"static" contains the files "index.html" and "node.js". The "node.js" file contains the frontend of the application. This file includes functions to fetch data from the backend and send data to the backend.
+
 
 ## How to run
 To start the first node, in the terminal, enter:
